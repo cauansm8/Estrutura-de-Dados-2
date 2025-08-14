@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdbool.h>
 
-#define b 5
+#define b 3
 
 int t = (b + 1) / 2;
 
@@ -25,13 +25,13 @@ arvB* criarNoRaizInicial()
     novoNo->n = 0;
     novoNo->folha = true;
 
-    escrita (novoNo);
+    //escrita (novoNo);
 
     return novoNo;
 }
 
 
-void leitura (arvB *r) // desenvolver
+/* void leitura (arvB *r) // desenvolver
 {
 
 }
@@ -39,14 +39,14 @@ void leitura (arvB *r) // desenvolver
 void escrita (arvB *r) // desenvolver
 {
     
-}
+} */
 
 arvB* buscarArv (arvB *r, int k)
 {
     int i = 0;
 
     // anda (pelo vetor de números) até encontrar um número maior ou igual 
-    while (i <= r->n && k > r->chave[i])
+    while (i < r->n && k > r->chave[i])
     {
         i++;
     }
@@ -71,92 +71,12 @@ arvB* buscarArv (arvB *r, int k)
     // se não é folha (tem filhos), continua a busca pelo nó filho 
     else
     {
-        leitura (r->filho[i]);
+        //leitura (r->filho[i]);
         return buscarArv (r->filho[i], k);
     }
 }
 
 
-void insereArvoreB(arvB *r, int k)  // função de inserir
-{
-    // se o nó estiver cheio, cria-se um novo nó (não folha, 0 chaves, primeiro filho como o nó anterior(que estava cheio) e insere o k no novo nó)
-    if (r->n == b)          
-    {
-        arvB *s = malloc(sizeof(arvB));
-        s->folha = false;
-        s->n = 0;
-        s->filho[0] = r;
-        splitChildArvoreB(s, 0);
-        insereNaoCheioArvoreB(s, k);
-    }
-    // se não estiver cheio, insere normalmente
-    else {
-        insereNaoCheioArvoreB(r, k);
-    }
-}
-
-void insereNaoCheioArvoreB(arvB *x, int k)
-{
-    // contador
-    int i = x->n;
-    
-    // se o nó for folha -> pode inserir direto
-    if (x->folha == true)
-    {
-        // loop para que os valores maiores que o k "pulem" para direita no vetor -> ordenação
-        while (i >= 0 && k < x->chave[i])
-        {
-            x->chave[i+1] = x->chave[i];
-            i--;
-        }
-
-        // inserção
-        x->chave[i+1] = k;
-
-        // indicando que há mais um número
-        x->n++;
-
-        // escrevendo no disco
-        escrever(x);
-
-
-    }
-    
-    // se o nó não é folha -> busca o filho
-    else {
-        
-        // encontrando a posição que o número deveria ser inserido se fosse folha 
-        // ou seja, estamos procurando o filho que receberá k
-        while (i >= 0 && k < x->chave[i])
-        {
-            i--;
-        }
-
-        // ajuste
-        i++;
-
-        // le o nó que está no disco
-        leitura (x->filho[i]);
-
-        // verifica se o nó filho está cheio
-        if (x->filho[i]->n == b)
-        {
-            // se estiver, faz o split na posição i
-            splitChildArvoreB(x, i);
-
-            // verifica se o número k é maior que o número que "subiu" com o split
-            // se k for maior, faz o reajuste (i++) 
-            if (k > x->chave[i])
-            {
-                i++;
-            }
-
-            // chama a função de inserção no nó filho
-            // lembrando que: só pode inserir em nó folha!
-            insereNaoCheioArvoreB(x->filho, k);
-        }
-    }
-}
 
 // **********************************************
 //  TESTAR OS LOOPS PARA ENTENDER MELHOR OS VALORES
@@ -179,7 +99,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     // passando os ultimos t-1 chaves ao novo nó (z)
     for (int j = 0; j < t - 1; j++)
     {
-        z->chave[j] = y->chave[t + j]; // ********************************* DÚVIDA -> a mediana está sendo passada ao z? ***********************
+        z->chave[j] = y->chave[t + j]; // ********************************* DÚVIDA -> a mediana está sendo passada ao pai? ***********************
     }
 
     // se o nó cheio tem filhos, é necessário passar esses filhos ao novo nó (z)
@@ -214,9 +134,119 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     x->chave[i] = y->chave[t];
     x->n ++;
 
-    escrever(x);
-    escrever(y);
-    escrever(z);
+    //escrever(x);
+    //escrever(y);
+    //escrever(z);
+
+}
+
+void insereNaoCheioArvoreB(arvB *x, int k)
+{
+    // contador
+    int i = x->n;
+    
+    // se o nó for folha -> pode inserir direto
+    if (x->folha == true)
+    {
+        // loop para que os valores maiores que o k "pulem" para direita no vetor -> ordenação
+        while (i >= 0 && k < x->chave[i])
+        {
+            x->chave[i+1] = x->chave[i];
+            i--;
+        }
+
+        // inserção
+        x->chave[i+1] = k;
+
+        // indicando que há mais um número
+        x->n++;
+
+        // escrevendo no disco
+        //escrever(x);
+
+
+    }
+    
+    // se o nó não é folha -> busca o filho
+    else {
+        
+        // encontrando a posição que o número deveria ser inserido se fosse folha 
+        // ou seja, estamos procurando o filho que receberá k
+        while (i >= 0 && k < x->chave[i])
+        {
+            i--;
+        }
+
+        // ajuste
+        i++;
+
+        // le o nó que está no disco
+        //leitura (x->filho[i]);
+
+        // verifica se o nó filho está cheio
+        if (x->filho[i]->n == b)
+        {
+            // se estiver, faz o split na posição i
+            splitChildArvoreB(x, i);
+
+            // verifica se o número k é maior que o número que "subiu" com o split
+            // se k for maior, faz o reajuste (i++) 
+            if (k > x->chave[i])
+            {
+                i++;
+            }
+        }
+
+        // chama a função de inserção no nó filho
+        // lembrando que: só pode inserir em nó folha!
+        insereNaoCheioArvoreB(x->filho[i], k);
+
+    }
+}
+
+
+void insereArvoreB(arvB *r, int k)  // função de inserir
+{
+    // se o nó estiver cheio, cria-se um novo nó (não folha, 0 chaves, primeiro filho como o nó anterior(que estava cheio) e insere o k no novo nó)
+    if (r->n == b)          
+    {
+        arvB *s = malloc(sizeof(arvB));
+        s->folha = false;
+        s->n = 0;
+        s->filho[0] = r;
+        splitChildArvoreB(s, 0);
+        insereNaoCheioArvoreB(s, k);
+    }
+    // se não estiver cheio, insere normalmente
+    else {
+        insereNaoCheioArvoreB(r, k);
+    }
+}
+
+
+
+
+void imprimir_arvore(arvB *arv)
+{
+    if (arv != NULL)
+    {
+        printf ("\n|   ");
+        for (int i = 0; i < arv->n; i++)
+        {
+            printf ("%d   ", arv->chave[i]);
+        }
+
+        printf ("|\n");
+
+        if (arv->folha == false)
+        {
+            for (int i = 0; i < arv->n + 1; i++)
+            {
+                imprimir_arvore(arv->filho[i]);
+            }
+        }
+    }
+
 
 }
 
@@ -225,9 +255,13 @@ int main ()
 {
     arvB *raiz = criarNoRaizInicial();
 
-    printf ("\n%d", raiz->n);
-    printf ("\n%d", raiz->folha);
+    insereArvoreB(raiz, 1);
+
+    insereArvoreB(raiz, 5);
+
+    insereArvoreB(raiz, 10);
     
+    imprimir_arvore(raiz);
 
 
     return 0;
