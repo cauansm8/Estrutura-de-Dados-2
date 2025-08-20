@@ -19,17 +19,14 @@ typedef struct no{
     // com alocação dinâmica, o primeiro elemento do vetor é algo tipo: 12981648
     // logo todos valores são maiores que esse número/lixo
     int *chave; 
-    struct no **filho;
+    struct no *filho[b+1];
 
 } arvB;
 
 arvB* criarNoRaizInicial()
 {
     arvB *novoNo = malloc(sizeof(arvB));
-    
     novoNo->chave = malloc(b * sizeof(int));
-    novoNo->filho = malloc((b+1) * sizeof(arvB*));
-
 
     novoNo->n = 0;
     novoNo->folha = true;
