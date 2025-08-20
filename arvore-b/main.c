@@ -19,7 +19,7 @@ typedef struct no{
     // com alocação dinâmica, o primeiro elemento do vetor é algo tipo: 12981648
     // logo todos valores são maiores que esse número/lixo
     int *chave; 
-    struct no *filho[b+1];
+    struct no **filho;
 
 } arvB;
 
@@ -27,14 +27,18 @@ arvB* criarNoRaizInicial()
 {
     arvB *novoNo = malloc(sizeof(arvB));
     
-    novoNo->chave = malloc(sizeof(b));
+    novoNo->chave = malloc(b * sizeof(int));
+    novoNo->filho = malloc((b+1) * sizeof(arvB*));
+
 
     novoNo->n = 0;
     novoNo->folha = true;
-    
-    for (int i = 0; i < b+1; i++) {
-        novoNo->filho[i] = NULL;    // inicializa os ponteiros
+
+    for (int i = 0; i < b+1; i++)
+    {
+        novoNo->filho[i] = NULL;
     }
+
 
     //escrita (novoNo);
 
@@ -142,8 +146,8 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     }
     
     // inserindo a mediana e atualizando o valor de n
-    x->chave[i] = y->chave[t];
-    x->n ++;
+    x->chave[i] = y->chave[t-1];
+    x->n++;
 
     //escrever(x);
     //escrever(y);
@@ -206,39 +210,41 @@ void insereNaoCheioArvoreB(arvB *x, int k)
             {
                 i++;
             }
-        
-            // chama a função de inserção no nó filho
-            // lembrando que: só pode inserir em nó folha!
-            insereNaoCheioArvoreB(x->filho[i], k);
-        
         }
+
+        // chama a função de inserção no nó filho
+        // lembrando que: só pode inserir em nó folha!
+        insereNaoCheioArvoreB(x->filho[i], k);
 
     }
 }
 
 
-void insereArvoreB(arvB *r, int k)  // função de inserir
+arvB* insereArvoreB(arvB *r, int k)  // função de inserir
 {
     // se o nó estiver cheio, cria-se um novo nó (não folha, 0 chaves, primeiro filho como o nó anterior(que estava cheio) e insere o k no novo nó)
     if (r->n == b)          
     {
         arvB *s = criarNoRaizInicial();
         s->folha = false;
-        s->n = 0;
         s->filho[0] = r;
         splitChildArvoreB(s, 0);
         insereNaoCheioArvoreB(s, k);
+
+        return s;   // manter a raiz atualizada
     }
     // se não estiver cheio, insere normalmente
     else {
         insereNaoCheioArvoreB(r, k);
+
+        return r;   // manter a raiz atualizada
     }
 }
 
 
 
 
-void imprimir_arvore(arvB *arv)
+void imprimir_arvore(arvB *arv, int nivel)
 {
     if (arv != NULL)
     {
@@ -248,17 +254,16 @@ void imprimir_arvore(arvB *arv)
             printf ("%d   ", arv->chave[i]);
         }
 
-        printf ("|\n");
+        printf ("| nivel - %d\n", nivel);
 
         if (arv->folha == false)
         {
             for (int i = 0; i < arv->n + 1; i++)
             {
-                imprimir_arvore(arv->filho[i]);
+                imprimir_arvore(arv->filho[i], nivel + 1);
             }
         }
     }
-
 
 }
 
@@ -267,19 +272,27 @@ int main ()
 {
     arvB *raiz = criarNoRaizInicial();
 
-    insereArvoreB(raiz, 1);
+    raiz = insereArvoreB(raiz, 1);
 
-    insereArvoreB(raiz, 5);
+    raiz = insereArvoreB(raiz, 5);
 
-    insereArvoreB(raiz, 10);
+    raiz = insereArvoreB(raiz, 10);
 
-    insereArvoreB(raiz, 3);
+    raiz = insereArvoreB(raiz, 3);
 
-    insereArvoreB(raiz, 7);
+    raiz = insereArvoreB(raiz, 7);
 
-    insereArvoreB(raiz, 16);
+    raiz = insereArvoreB(raiz, 16);
+
+    raiz = insereArvoreB(raiz, 6);
+
+    raiz = insereArvoreB(raiz, 8);
+
+    raiz = insereArvoreB(raiz, 9);
     
-    imprimir_arvore(raiz);
+    raiz = insereArvoreB(raiz, 12);
+    
+    imprimir_arvore(raiz, 0);
 
 
     return 0;
