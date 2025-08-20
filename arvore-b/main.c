@@ -7,13 +7,18 @@
 
 int t = (b + 1) / 2;
 
-
-
 typedef struct no{
 
     int n;
     bool folha;
-    int chave[b];
+
+    // essa alocação dinâmica das chaves serve para que o lixo criado no vetor tenha um valor alto
+    // logo, no while insereNaoCheioArvoreB não tem problema -> evita o erro
+    // quando o vetor era alocação fixa (int chave[b]) o primeiro era zero, ou seja, 
+    // o primeiro elemento do vetor era sempre zero (se k fosse maior que zero)
+    // com alocação dinâmica, o primeiro elemento do vetor é algo tipo: 12981648
+    // logo todos valores são maiores que esse número/lixo
+    int *chave; 
     struct no *filho[b+1];
 
 } arvB;
@@ -21,9 +26,15 @@ typedef struct no{
 arvB* criarNoRaizInicial()
 {
     arvB *novoNo = malloc(sizeof(arvB));
+    
+    novoNo->chave = malloc(sizeof(b));
 
     novoNo->n = 0;
     novoNo->folha = true;
+    
+    for (int i = 0; i < b+1; i++) {
+        novoNo->filho[i] = NULL;    // inicializa os ponteiros
+    }
 
     //escrita (novoNo);
 
@@ -84,7 +95,7 @@ arvB* buscarArv (arvB *r, int k)
 void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai e o índice do filho que será dividido
 {
     // novo nó
-    arvB *z = malloc(sizeof(arvB)); 
+    arvB *z = criarNoRaizInicial();
 
     // ponteiro ao filho que sofrerá split
     arvB *y = x->filho[i];
@@ -195,11 +206,12 @@ void insereNaoCheioArvoreB(arvB *x, int k)
             {
                 i++;
             }
+        
+            // chama a função de inserção no nó filho
+            // lembrando que: só pode inserir em nó folha!
+            insereNaoCheioArvoreB(x->filho[i], k);
+        
         }
-
-        // chama a função de inserção no nó filho
-        // lembrando que: só pode inserir em nó folha!
-        insereNaoCheioArvoreB(x->filho[i], k);
 
     }
 }
@@ -210,7 +222,7 @@ void insereArvoreB(arvB *r, int k)  // função de inserir
     // se o nó estiver cheio, cria-se um novo nó (não folha, 0 chaves, primeiro filho como o nó anterior(que estava cheio) e insere o k no novo nó)
     if (r->n == b)          
     {
-        arvB *s = malloc(sizeof(arvB));
+        arvB *s = criarNoRaizInicial();
         s->folha = false;
         s->n = 0;
         s->filho[0] = r;
@@ -260,6 +272,12 @@ int main ()
     insereArvoreB(raiz, 5);
 
     insereArvoreB(raiz, 10);
+
+    insereArvoreB(raiz, 3);
+
+    insereArvoreB(raiz, 7);
+
+    insereArvoreB(raiz, 16);
     
     imprimir_arvore(raiz);
 
