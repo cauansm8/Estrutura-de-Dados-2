@@ -28,7 +28,7 @@ arvB* criarNoRaizInicial()
     arvB *novoNo = malloc(sizeof(arvB));
 
     novoNo->chave = malloc(b * sizeof(int));
-    novoNo->filho = malloc((b+1) * sizeof(arvB));
+    novoNo->filho = malloc((b+1) * sizeof(arvB*));
 
     novoNo->n = 0;
     novoNo->folha = true;
@@ -113,7 +113,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     // passando os ultimos t-1 chaves ao novo nó (z)
     for (int j = 0; j < t - 1; j++)
     {
-        z->chave[j] = y->chave[t + j]; // ********************************* DÚVIDA -> a mediana está sendo passada ao pai? ***********************
+        z->chave[j] = y->chave[t + j]; 
     }
 
     // se o nó cheio tem filhos, é necessário passar esses filhos ao novo nó (z)
@@ -157,7 +157,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
 void insereNaoCheioArvoreB(arvB *x, int k)
 {
     // contador
-    int i = x->n;
+    int i = x->n - 1;
     
     // se o nó for folha -> pode inserir direto
     if (x->folha == true)
@@ -351,7 +351,7 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
 {
     int i = 0;
 
-    while (i < x->n && k < x->chave[i])
+    while (i < x->n && k > x->chave[i])
     {
         i++;
     }
@@ -425,7 +425,103 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
         // escrever(x);
     }
 
+    // caso 3
+    else
+    {
+        // ponteiros
+        arvB *y = x->filho[i];      // esquerda
 
+        arvB *z = x->filho[i+1];    // direita
+
+        // a - 1 -> filho da esquerda tem t-1 chaves
+        
+        if (y->n == t - 1 && z->n >= t)
+        {
+            int numero_que_sobe = z->chave[0];
+
+            int numero_que_vai_para_esquerda = x->chave[i];
+
+            // copiando os valores
+
+            x->chave[i] = numero_que_sobe;
+
+            y->chave[y->n] = numero_que_vai_para_esquerda;
+            
+            // passando o filho da direita
+
+            y->filho[y->n + 1] = z->filho[0];
+
+            y->n++;
+
+            z->n--;
+
+            // arrumando o vetor da direita
+
+            for (int j = 0; j < z->n; j++)
+            {
+                z->chave[j] = z->chave[j+1];
+            }
+
+            for (int j = 0; j < z->n + 1; j++)
+            {
+                z->filho[j] = z->filho[j+1];
+            }
+
+        }
+
+        // a - 2 -> filho da direita tem t-1 chaves
+
+        else if (y->n >= t && z->n == t-1)
+        {
+            int numero_que_sobe = y->chave[y->n-1];
+
+            int numero_que_vai_para_direita = x->chave[i];
+
+            // copiando os valores
+
+            x->chave[i] = numero_que_sobe;
+
+
+            // abrindo espaço no filho z (vai receber a chave[i] do pai)
+            for (int j = z->n; j > 0; j--)
+            {
+                z->chave[j] = z->chave[j-1];
+            }
+
+            z->chave[0] = numero_que_vai_para_direita;
+            
+            y->n--;
+            z->n++;
+            
+            // passando o filho da esquerda
+
+            for (int j = z->n; j >0 ; j--)
+            {
+                z->filho[j] = z->filho[j-1];
+            }
+
+            z->filho[0] = y->filho[y->n + 1];
+        }
+
+
+        // b - os dois tem t-1 chaves -> merge
+        else
+        {
+            // so para garantir que estamos mesclando vetores existentes
+            if (i < x->n)
+            {
+                mergeChildArvoreB(x, i);
+            }
+
+            // evita que faça merge entre: ultimo filho e um filho inexistente
+            else {
+                mergeChildArvoreB (x, i-1);
+            }
+
+        }
+
+        remover(y , k);
+    }
 
 }
 
@@ -457,8 +553,15 @@ int main ()
     
     raiz = insereArvoreB(raiz, 12);
     
+    printf ("\n\n\nIMPRIMINDO ARVORE-B\n");
+
     imprimir_arvore(raiz, 0);
 
+    remover(raiz, 16);
+
+    printf ("\n\n\nIMPRIMINDO ARVORE-B\n");
+
+    imprimir_arvore(raiz, 0);
 
     return 0;
 }
