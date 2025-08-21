@@ -19,14 +19,16 @@ typedef struct no{
     // com alocação dinâmica, o primeiro elemento do vetor é algo tipo: 12981648
     // logo todos valores são maiores que esse número/lixo
     int *chave; 
-    struct no *filho[b+1];
+    struct no **filho;
 
 } arvB;
 
 arvB* criarNoRaizInicial()
 {
     arvB *novoNo = malloc(sizeof(arvB));
+
     novoNo->chave = malloc(b * sizeof(int));
+    novoNo->filho = malloc((b+1) * sizeof(arvB));
 
     novoNo->n = 0;
     novoNo->folha = true;
@@ -263,6 +265,172 @@ void imprimir_arvore(arvB *arv, int nivel)
     }
 
 }
+
+
+void mergeChildArvoreB (arvB *x, int i) // função merge
+{
+    // ponteiros aos filhos
+    arvB *y = x->filho[i];
+    arvB *z = x->filho[i+1];
+
+    // desce a mediana (entre os filhos) do pai
+    y->chave[t-1] = x->chave[i];
+
+    y->n++;
+
+    // passando as chaves
+    for (int j = 0; j < z->n; j++)
+    {
+        y->chave[j+t] = z->chave[j];
+    }
+
+    // se y não é folha (z tbm não é) -> passa os filhos
+    if (y->folha == false)
+    {
+        for (int j = 0; j < z->n+1; j++)
+        {
+            y->filho[j+t] = z->filho[j];
+        }
+    }
+
+    y->n += z->n;
+    
+    free (z);
+    
+    // y se juntou ao z 
+
+    // falta ajustar o nó pai em relação ao número que desceu!
+
+    x->n--;
+
+    // removendo a mediana(número entre os filhos que sofreram merge) do pai (já que ela desceu)
+    for (int j = i; j < x->n; j++)
+    {
+        x->chave[j] = x->chave[j+1];
+    }
+
+    // ajustando os filhos
+    for (int j = i + 1; j < x->n + 1; j++)
+    {
+        x->filho[j] = x->filho[j+1];
+    }
+
+    // escrever (x);
+    // escrever (y);
+}
+
+// implementando a remoção de um número K
+// caso 1: k no nó folha -> remoção direta -> mais simples -> reajuste e x->n-- 
+
+// caso 2: t-1 -> mínimo de chaves no nó -> logo, para se retirar precisa ter no minimo t para substituição
+// a - encontrar um predecessor na posição i de k -> k'
+//      coloca o k' no lugar do k
+//      remove o k' (original)
+
+// b - encontrar um sucessor na posição i+1 de k -> k'
+//      coloca k' no lugar do k
+//      remove o k' (original)
+
+// c - os dois nós estão com o mínimo (t - 1)
+//      merge nos filhos (i, i+1)
+//      remove o k
+
+// caso 3: esse caso não remove apenas garante que os filhos tenham pelo menos t chaves 
+// a - filho i tem t-1 chaves
+//      passa a chave ao filho que tem só t-1 chaves
+//      passa ao pai (x) um elemento do filho que tem pelo menos t chaves
+//              -> se o filho for da direita: pega o menor
+//              -> se o filho for da esquerda: pega o maior
+
+// b - os dois filhos tem apenas t-1 chaves
+//      merge nos filhos
+//      insere o elemento do pai no nó filho tbm
+
+
+void remover (arvB *x, int k) // a remoção usará os casos acima + função merge
+{
+    int i = 0;
+
+    while (i < x->n && k < x->chave[i])
+    {
+        i++;
+    }
+
+    // caso 1 - nó folha
+    if (x->folha == true)
+    {
+        if (x->chave[i] == k)
+        {
+            for (int j = i; j < x->n - 1; j++)
+            {
+                x->chave[j] = x->chave[j+1];
+            }
+
+            x->n--;
+
+            // escrever(x);
+
+            printf ("\n\nELEMENTO REMOVIDO!!");
+        }
+        
+        else 
+        {
+            printf ("\n\nELEMENTO NÃO ENCONTRADO!!");
+        }
+
+    }
+
+    // caso 2 - nó interno
+
+    else if (i < x->n && x->chave[i] == k)
+    {
+        // ponteiros
+        arvB *y = x->filho[i];      // esquerda
+
+        arvB *z = x->filho[i+1];    // direita
+
+        // a - predecessor
+        if (y->n > t - 1)                           // filho a esquerda tem mais que o minimo de chaves
+        {
+            int posicao = y->n - 1;                 // o maior valor menor que k -> ou seja, pega o maior valor de y (sempre vai ser menor do que k)
+
+            int predecessor = y->chave [posicao];   // arquivando o valor
+
+            x->chave[i] = predecessor;              // copiando o valor para o nó pai
+
+            remover(y, predecessor);                // removendo o número original
+        }
+
+        // b - sucessor
+        else if (z->n > t - 1)                      // o filho a direita tem mais que o minimo de chaves
+        {
+            int posicao = 0;                        // o menor valor maior que k -> ou seja, pega o menor valor de z (sempre vai ser maior que k)
+
+            int sucessor = z->chave[posicao];
+
+            x->chave[i] = sucessor;
+
+            remover (z, sucessor);
+        }
+
+
+        // c - merge
+        else                                        // os dois estão com o mínimo de chaves (não é possível substituir)
+        {
+            mergeChildArvoreB(x, i);                // merge - junta os filhos
+
+            remover(y, k);                          // o k (desceu ao filho_merge) precisa ser removido
+        }
+
+        // escrever(x);
+    }
+
+
+
+}
+
+
+
 
 
 int main ()
