@@ -5,6 +5,11 @@
 
 #define b 3
 
+// busca - normal
+// inserção - tradicional
+// remoção - CLRS
+
+
 int t = (b + 1) / 2;
 
 typedef struct no{
@@ -113,7 +118,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     // passando os ultimos t-1 chaves ao novo nó (z)
     for (int j = 0; j < t - 1; j++)
     {
-        z->chave[j] = y->chave[t + j]; 
+        z->chave[j] = y->chave[j + t]; 
     }
 
     // se o nó cheio tem filhos, é necessário passar esses filhos ao novo nó (z)
@@ -122,7 +127,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
         // como tem b+1 filhos, passam-se os ultimos t filhos 
         for (int j = 0; j < t; j++)
         {
-            z->filho[j] = y->filho[t + j];
+            z->filho[j] = y->filho[j + t];
         }
     }
 
@@ -158,6 +163,7 @@ void insereNaoCheioArvoreB(arvB *x, int k)
 {
     // contador
     int i = x->n - 1;
+
     
     // se o nó for folha -> pode inserir direto
     if (x->folha == true)
@@ -177,7 +183,6 @@ void insereNaoCheioArvoreB(arvB *x, int k)
 
         // escrevendo no disco
         //escrever(x);
-
 
     }
     
@@ -247,41 +252,55 @@ void imprimir_arvore(arvB *arv, int nivel)
 {
     if (arv != NULL)
     {
-        printf ("\n|   ");
+        printf ("\nnivel - %d  ", nivel);
+        printf ("n = %d   ", arv->n);
+        printf (" -> |   ");
         for (int i = 0; i < arv->n; i++)
         {
             printf ("%d   ", arv->chave[i]);
         }
 
-        printf ("| nivel - %d\n", nivel);
+        printf ("|\n");
 
         if (arv->folha == false)
         {
             for (int i = 0; i < arv->n + 1; i++)
             {
-                imprimir_arvore(arv->filho[i], nivel + 1);
+                if (arv->filho[i] != NULL)
+                {
+                    imprimir_arvore(arv->filho[i], nivel + 1);
+                }
             }
         }
     }
 
 }
 
+void imprimir(arvB *raiz)
+{
+    printf ("\n\n\nIMPRIMINDO ARVORE-B\n");
+
+    imprimir_arvore(raiz, 0);
+}
+
 
 void mergeChildArvoreB (arvB *x, int i) // função merge
 {
+    printf ("\nEntrou no merge?");
+
     // ponteiros aos filhos
     arvB *y = x->filho[i];
     arvB *z = x->filho[i+1];
 
     // desce a mediana (entre os filhos) do pai
-    y->chave[t-1] = x->chave[i];
+    y->chave[y->n] = x->chave[i];
 
     y->n++;
 
     // passando as chaves
     for (int j = 0; j < z->n; j++)
     {
-        y->chave[j+t] = z->chave[j];
+        y->chave[t + j] = z->chave[j];
     }
 
     // se y não é folha (z tbm não é) -> passa os filhos
@@ -289,14 +308,12 @@ void mergeChildArvoreB (arvB *x, int i) // função merge
     {
         for (int j = 0; j < z->n+1; j++)
         {
-            y->filho[j+t] = z->filho[j];
+            y->filho[t + j] = z->filho[j];
         }
     }
 
     y->n += z->n;
-    
-    free (z);
-    
+        
     // y se juntou ao z 
 
     // falta ajustar o nó pai em relação ao número que desceu!
@@ -314,6 +331,9 @@ void mergeChildArvoreB (arvB *x, int i) // função merge
     {
         x->filho[j] = x->filho[j+1];
     }
+
+    free (z);
+    x->filho[x->n + 1] = NULL;
 
     // escrever (x);
     // escrever (y);
@@ -347,9 +367,15 @@ void mergeChildArvoreB (arvB *x, int i) // função merge
 //      insere o elemento do pai no nó filho tbm
 
 
-void remover (arvB *x, int k) // a remoção usará os casos acima + função merge
+void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos acima + função merge
 {
     int i = 0;
+
+    if (x == NULL){
+        printf ("\nELEMENTO NAO ENCONTRADO! - null");
+
+        return;
+    }
 
     while (i < x->n && k > x->chave[i])
     {
@@ -359,8 +385,9 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
     // caso 1 - nó folha
     if (x->folha == true)
     {
-        if (x->chave[i] == k)
+        if (i < x->n && x->chave[i] == k)
         {
+
             for (int j = i; j < x->n - 1; j++)
             {
                 x->chave[j] = x->chave[j+1];
@@ -375,22 +402,24 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
         
         else 
         {
-            printf ("\n\nELEMENTO NÃO ENCONTRADO!!");
+            printf ("\n\nELEMENTO NAO ENCONTRADO!!");
         }
 
+        return;
     }
 
     // caso 2 - nó interno
 
     else if (i < x->n && x->chave[i] == k)
     {
+
         // ponteiros
         arvB *y = x->filho[i];      // esquerda
 
         arvB *z = x->filho[i+1];    // direita
 
         // a - predecessor
-        if (y->n > t - 1)                           // filho a esquerda tem mais que o minimo de chaves
+        if (y != NULL && y->n >= t)                           // filho a esquerda tem mais que o minimo de chaves
         {
             int posicao = y->n - 1;                 // o maior valor menor que k -> ou seja, pega o maior valor de y (sempre vai ser menor do que k)
 
@@ -398,11 +427,11 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
 
             x->chave[i] = predecessor;              // copiando o valor para o nó pai
 
-            remover(y, predecessor);                // removendo o número original
+            remover(raizInicial, y, predecessor);                // removendo o número original
         }
 
         // b - sucessor
-        else if (z->n > t - 1)                      // o filho a direita tem mais que o minimo de chaves
+        else if (z != NULL && z->n >= t)                      // o filho a direita tem mais que o minimo de chaves
         {
             int posicao = 0;                        // o menor valor maior que k -> ou seja, pega o menor valor de z (sempre vai ser maior que k)
 
@@ -410,7 +439,7 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
 
             x->chave[i] = sucessor;
 
-            remover (z, sucessor);
+            remover (raizInicial, z, sucessor);
         }
 
 
@@ -419,108 +448,146 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
         {
             mergeChildArvoreB(x, i);                // merge - junta os filhos
 
-            remover(y, k);                          // o k (desceu ao filho_merge) precisa ser removido
+            remover(raizInicial, y, k);                          // o k (desceu ao filho_merge) precisa ser removido
         }
 
         // escrever(x);
     }
 
-    // caso 3
+    // caso 3 - nao achou o valor
     else
     {
         // ponteiros
-        arvB *y = x->filho[i];      // esquerda
 
-        arvB *z = x->filho[i+1];    // direita
+        arvB *filhoAlvo = x->filho[i];
+       
+        arvB *irmaoEsq;
 
-        // a - 1 -> filho da esquerda tem t-1 chaves
+        if (i > 0){
+            irmaoEsq = x->filho[i - 1];
+        }
+        else {
+            irmaoEsq = NULL;
+        }
+
+        arvB *irmaoDir;
+
+        if (i < x->n)
+        {
+            irmaoDir = x->filho[i + 1];
+        }
+        else 
+        {
+            irmaoDir = NULL;
+        }
         
-        if (y->n == t - 1 && z->n >= t)
+
+        // filhoAlvo - próximo nó a ser buscado k
+        // filhoAlvo tem t-1 chaves (minimo) - para evitar mais merge, faremos trocas de valores entre os filhos a esquerda e direita dele!
+        if (filhoAlvo->n == t - 1)
         {
-            int numero_que_sobe = z->chave[0];
 
-            int numero_que_vai_para_esquerda = x->chave[i];
-
-            // copiando os valores
-
-            x->chave[i] = numero_que_sobe;
-
-            y->chave[y->n] = numero_que_vai_para_esquerda;
-            
-            // passando o filho da direita
-
-            y->filho[y->n + 1] = z->filho[0];
-
-            y->n++;
-
-            z->n--;
-
-            // arrumando o vetor da direita
-
-            for (int j = 0; j < z->n; j++)
+            // caso a
+            // irmaoEsquerda tem mais que o minimo (t-1)
+            if (irmaoEsq != NULL && irmaoEsq->n >= t)
             {
-                z->chave[j] = z->chave[j+1];
+                int numero_que_vai_para_o_pai = irmaoEsq->chave[irmaoEsq->n - 1];
+
+                int numero_que_vai_para_o_filho_alvo = x->chave[i - 1];
+
+                // colocando o valor no nó pai
+                x->chave[i - 1] = numero_que_vai_para_o_pai;
+
+                // abrindo espaço para o filhoAlvo
+                for (int j = filhoAlvo->n; j > 0; j--)
+                {
+                    filhoAlvo->chave[j] = filhoAlvo->chave[j - 1]; 
+                }
+
+                // inserindo o pai->chave[i] no filhoAlvo
+                filhoAlvo->chave[0] = numero_que_vai_para_o_filho_alvo;
+            
+                // se o filho da esquerda não for folha -> tem filhos -> precisa passar os filhos ao filhoAlvo
+                if (irmaoEsq->folha == false)
+                {
+                    for (int j = filhoAlvo->n + 1; j > 0; j--)
+                    {
+                        filhoAlvo->filho[j] = filhoAlvo->filho[j - 1];
+                    }
+
+                    filhoAlvo->filho[0] = irmaoEsq->filho[irmaoEsq->n];                    
+                }
+            
+                // ajustando n de cada nó
+                irmaoEsq->n--;
+                filhoAlvo->n++;
+
+
             }
 
-            for (int j = 0; j < z->n + 1; j++)
+            // caso b
+            // irmaoDireita tem mais que o minimo (t-1)
+            else if (irmaoDir != NULL && irmaoDir->n >= t)
             {
-                z->filho[j] = z->filho[j+1];
+                int numero_que_vai_para_o_pai = irmaoDir->chave[0];
+
+                int numero_que_vai_para_o_filho_alvo = x->chave[i];
+                
+                // colocando o valor no nó pai
+                x->chave[i] = numero_que_vai_para_o_pai;
+
+                // colocando o valor do pai no filhoAlvo
+                filhoAlvo->chave[filhoAlvo->n] = numero_que_vai_para_o_filho_alvo;
+
+                // se o filho da direita não for folha -> tem filhos -> precisa passar os filhos ao filhoAlvo
+                if (irmaoDir->folha == false)
+                {
+                    filhoAlvo->filho[filhoAlvo->n + 1] = irmaoDir->filho[0];
+                }
+
+
+                // ajustando os valores do irmao da direita
+                for (int j = 0; j < irmaoDir->n - 1; j++)
+                {
+                    irmaoDir->chave[j] = irmaoDir->chave[j + 1];
+                }
+
+                // ajustando os filhos do irmao da direita
+                for (int j = 0; j < irmaoDir->n; j++)
+                {
+                    irmaoDir->filho[j] = irmaoDir->filho[j + 1];
+                }
+
+
+                // ajustando n de cada nó
+                irmaoDir->n--;
+                filhoAlvo->n++;
+            }
+
+            // c - os dois tem t-1 chaves -> merge
+            else
+            {
+                // esse if serve para evitar que faça merge na raiz da arvore, pois a regra permite que a raiz tenha t-1 chaves
+                if (x != raizInicial)
+                {
+                        // so para garantir que estamos mesclando vetores existentes
+                    if (i < x->n)
+                    {
+                        mergeChildArvoreB(x, i);
+                    }
+
+                    // evita que faça merge entre: ultimo filho e um filho inexistente
+                    else {
+                        mergeChildArvoreB (x, i-1);
+                    }
+                }
+
             }
 
         }
 
-        // a - 2 -> filho da direita tem t-1 chaves
 
-        else if (y->n >= t && z->n == t-1)
-        {
-            int numero_que_sobe = y->chave[y->n-1];
-
-            int numero_que_vai_para_direita = x->chave[i];
-
-            // copiando os valores
-
-            x->chave[i] = numero_que_sobe;
-
-
-            // abrindo espaço no filho z (vai receber a chave[i] do pai)
-            for (int j = z->n; j > 0; j--)
-            {
-                z->chave[j] = z->chave[j-1];
-            }
-
-            z->chave[0] = numero_que_vai_para_direita;
-            
-            y->n--;
-            z->n++;
-            
-            // passando o filho da esquerda
-
-            for (int j = z->n; j >0 ; j--)
-            {
-                z->filho[j] = z->filho[j-1];
-            }
-
-            z->filho[0] = y->filho[y->n + 1];
-        }
-
-
-        // b - os dois tem t-1 chaves -> merge
-        else
-        {
-            // so para garantir que estamos mesclando vetores existentes
-            if (i < x->n)
-            {
-                mergeChildArvoreB(x, i);
-            }
-
-            // evita que faça merge entre: ultimo filho e um filho inexistente
-            else {
-                mergeChildArvoreB (x, i-1);
-            }
-
-        }
-
-        remover(y , k);
+        remover(raizInicial, filhoAlvo, k);
     }
 
 }
@@ -552,16 +619,23 @@ int main ()
     raiz = insereArvoreB(raiz, 9);
     
     raiz = insereArvoreB(raiz, 12);
+
+    raiz = insereArvoreB(raiz, 18);
+
+    raiz = insereArvoreB(raiz, 17);
+
+    raiz = insereArvoreB(raiz, 20);  
     
-    printf ("\n\n\nIMPRIMINDO ARVORE-B\n");
+    raiz = insereArvoreB(raiz, 21); 
 
-    imprimir_arvore(raiz, 0);
+    raiz = insereArvoreB(raiz, 14); 
 
-    remover(raiz, 16);
+    imprimir(raiz);
 
-    printf ("\n\n\nIMPRIMINDO ARVORE-B\n");
+    remover(raiz, raiz, 10);
 
-    imprimir_arvore(raiz, 0);
+    imprimir(raiz);
+
 
     return 0;
 }
