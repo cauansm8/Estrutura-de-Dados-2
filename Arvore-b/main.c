@@ -286,8 +286,6 @@ void imprimir(arvB *raiz)
 
 void mergeChildArvoreB (arvB *x, int i) // função merge
 {
-    printf ("\nEntrou no merge?");
-
     // ponteiros aos filhos
     arvB *y = x->filho[i];
     arvB *z = x->filho[i+1];
