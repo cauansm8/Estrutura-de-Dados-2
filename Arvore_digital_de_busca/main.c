@@ -203,6 +203,8 @@ no* remover_rec(no *raiz, unsigned chave, int nivel)
             raiz->dir = remover_rec(raiz->dir, chave, nivel+1);
         }
     }
+
+    return raiz;
 }
 
 no* remover(no *raiz, unsigned chave)
