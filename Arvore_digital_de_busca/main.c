@@ -128,9 +128,93 @@ void imprimir(no *raiz)
     printf ("\n\n");
 }
 
+no* remover_rec(no *raiz, unsigned chave, int nivel)
+{
+    if (raiz == NULL)
+    {
+        printf ("\nChave nao encontrada!");
+        return NULL;
+    }
+
+    if (raiz->chave == chave)
+    {
+        // 1 caso - nó folha
+        if (raiz->esq == NULL && raiz->dir == NULL)
+        {
+            free (raiz);
+            return NULL;
+        }
+
+
+        // 2 caso - a
+        // nó esquerdo null
+        // nó direito != null
+        else if (raiz->esq == NULL && raiz->dir != NULL)
+        {
+            no *filhoDireita = raiz->dir;
+
+            free (raiz);
+
+            return filhoDireita;
+
+        }
+
+
+        // 2 caso - b
+        // nó esquerdo != null
+        // nó direito null
+        else if (raiz->esq != NULL && raiz->dir == NULL)
+        {
+
+            no *filhoEsquerda = raiz->esq;
+
+            free (raiz);
+
+            return filhoEsquerda;
+        }
+
+
+        // 3 caso
+        // nó interno
+        else if (raiz->esq != NULL && raiz->dir != NULL)
+        {
+            no *descendente_da_esquerda = raiz->esq;
+
+            while (descendente_da_esquerda->dir != NULL)
+            {
+                descendente_da_esquerda = descendente_da_esquerda->dir;
+            }
+
+            raiz->chave = descendente_da_esquerda->chave;
+
+            raiz->esq = remover_rec(raiz->esq, descendente_da_esquerda->chave, nivel + 1);
+
+        }
+
+    }
+    else
+    {
+        if (bit(chave, nivel) == 0)
+        {
+            raiz->esq = remover_rec(raiz->esq, chave, nivel+1);
+        }
+        else
+        {
+            raiz->dir = remover_rec(raiz->dir, chave, nivel+1);
+        }
+    }
+}
+
+no* remover(no *raiz, unsigned chave)
+{
+    return remover_rec(raiz, chave, 0);
+}
+
 int main ()
 {
     no *raiz = NULL;
+
+    raiz = inserir(raiz, 0);
 
     raiz = inserir(raiz, 1);
 
@@ -138,11 +222,17 @@ int main ()
 
     raiz = inserir(raiz, 2);
 
+    raiz = inserir(raiz, 3);
+
     raiz = inserir(raiz, 4);
 
     raiz = inserir(raiz, 9);
 
     raiz = inserir(raiz, 12);
+
+    imprimir(raiz);
+
+    raiz = remover(raiz, 1);
 
     imprimir(raiz);
 
