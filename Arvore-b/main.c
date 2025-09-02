@@ -6,7 +6,7 @@
 #define b 3
 
 // busca - normal
-// inserção - tradicional
+// inserção - CLRS
 // remoção - CLRS
 
 
@@ -380,7 +380,7 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
         i++;
     }
 
-    // caso 1 - nó folha
+    // caso 1 - nó folha + ACHOU O VALOR
     if (x->folha == true)
     {
         if (i < x->n && x->chave[i] == k)
@@ -406,7 +406,7 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
         return;
     }
 
-    // caso 2 - nó interno
+    // caso 2 - nó interno + ACHOU O VALOR
 
     else if (i < x->n && x->chave[i] == k)
     {
@@ -419,9 +419,14 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
         // a - predecessor
         if (y != NULL && y->n >= t)                           // filho a esquerda tem mais que o minimo de chaves
         {
-            int posicao = y->n - 1;                 // o maior valor menor que k -> ou seja, pega o maior valor de y (sempre vai ser menor do que k)
+            int predecessor;
 
-            int predecessor = y->chave [posicao];   // arquivando o valor
+            while (y->folha == false)
+            {
+                y = y->filho[y->n]; // tem que pegar o maior valor (entre os filhos) menor que K -> isso leva em considereção a todos os filhos
+            }
+
+            predecessor = y->chave[y->n - 1];
 
             x->chave[i] = predecessor;              // copiando o valor para o nó pai
 
@@ -431,9 +436,15 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
         // b - sucessor
         else if (z != NULL && z->n >= t)                      // o filho a direita tem mais que o minimo de chaves
         {
-            int posicao = 0;                        // o menor valor maior que k -> ou seja, pega o menor valor de z (sempre vai ser maior que k)
 
-            int sucessor = z->chave[posicao];
+            int sucessor;
+
+            while (z->folha == false)
+            {
+                z = z->filho[0];
+            }
+
+            sucessor = z->chave[0];
 
             x->chave[i] = sucessor;
 
@@ -630,7 +641,11 @@ int main ()
 
     imprimir(raiz);
 
-    remover(raiz, raiz, 10);
+    remover(raiz, raiz, 16);
+
+    imprimir(raiz);
+
+    remover(raiz, raiz, 7);
 
     imprimir(raiz);
 
