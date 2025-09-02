@@ -441,14 +441,14 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
 
             while (z->folha == false)
             {
-                z = z->filho[0];
+                z = z->filho[0]; // tem que pegar o menor valor (entre os filhos) maior que K -> isso leva em consideração a todos os filhos
             }
 
             sucessor = z->chave[0];
 
-            x->chave[i] = sucessor;
+            x->chave[i] = sucessor;               // copiando o valor
 
-            remover (raizInicial, z, sucessor);
+            remover (raizInicial, z, sucessor);     // removendo o número original
         }
 
 
