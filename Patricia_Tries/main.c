@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define bits_na_chave 4
+#define bits_na_chave 8
 
 typedef struct no{
     unsigned chave;
@@ -188,15 +188,16 @@ int main ()
 {
     no *dummy = criarDummy();
 
-    insere(dummy, 16);
-    insere(dummy, 28);
-    insere(dummy, 19);
     insere(dummy, 41);
-    insere(dummy, 36);
+    insere(dummy, 19);
+    insere(dummy, 28);
+    insere(dummy, 16);
     insere(dummy, 49);
+    insere(dummy, 36);
     insere(dummy, 62);
     insere(dummy, 57);
     insere(dummy, 58);
+    insere(dummy, 0);
 
     imprimir(dummy);
 
