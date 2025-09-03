@@ -165,7 +165,9 @@ void imprimir_rec(no* atual, no *anterior)
     // ou seja, o caminho para imprimir é: sempre deve aumentar o atual->bit, se não: subiu (diminuiu o bit) ou continuou igual
     if (atual->bit > anterior->bit)
     {
-        printf ("\n%u", atual->chave);
+        printf ("\nBit: %d", atual->bit);
+        printf ("\nChave: %u", atual->chave);
+        printf ("\n");
 
         imprimir_rec(atual->esq, atual);
         
@@ -186,9 +188,15 @@ int main ()
 {
     no *dummy = criarDummy();
 
-    insere(dummy, 5);
-    insere(dummy, 7);
-    insere(dummy, 3);
+    insere(dummy, 16);
+    insere(dummy, 28);
+    insere(dummy, 19);
+    insere(dummy, 41);
+    insere(dummy, 36);
+    insere(dummy, 49);
+    insere(dummy, 62);
+    insere(dummy, 57);
+    insere(dummy, 58);
 
     imprimir(dummy);
 
