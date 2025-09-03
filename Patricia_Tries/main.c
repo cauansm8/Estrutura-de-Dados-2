@@ -10,6 +10,21 @@ typedef struct no{
     struct no *dir;
 }no;
 
+
+// função para criar o dummy
+no* criarDummy()
+{
+    no *dummy = malloc(sizeof(no));
+    dummy->bit = -1;
+    dummy->chave = 99999;
+    dummy->esq = dummy;
+    dummy->dir = dummy;
+
+    return dummy;
+}
+
+
+// função para pegar o bit de alguma posição específica (igual a função da árvore digital de busca)
 unsigned bit (unsigned chave, int nivel)
 {
     return chave >> (bits_na_chave - 1 - nivel) & 1;
@@ -61,40 +76,22 @@ no* busca(no *raiz, unsigned x)
 
 */
 
-
-void insere (no *raiz, unsigned chave)
-{
-    int i;
-
-    // passa o raiz->esq pq a cabeça é dummy 
-    no *retorno_da_busca = busca_rec (raiz->esq, chave, -1);
-
-    if (chave == retorno_da_busca->chave)
-    {
-        printf ("\nElemento ja esta na arvore!");
-        return;
-    }
-
-    // LOOP IMPORTANTE
-    // verificando onde se diferenciam
-    // ex: 001 e 010
-    // -> 2 - somente a primeira posição é igual (lembrando que a contagem de bit() é da esquerda pra direita)
-    // a posição 2 é diferente
-    for (i = 0; bit(chave, i) == bit(retorno_da_busca, i); i++);
-
-    // novamente, o raiz->esq é para sair do dummy
-    raiz->esq = insere_rec(raiz->esq, chave, i, raiz);
-
-}
-
+// função que faz a 2° busca + inserção da chave
 no* insere_rec (no *raiz, unsigned chave, int i, no *pai)
 {
-    no *novoNo;
-
     // verificação para ver se subiu ou foi para o mesmo nó
-    if (raiz->bit <= i || raiz->bit < pai->bit)
+    // raiz->bit >= i ===== significa que a diferença está antes - imagina assim:
+    //      i = 3
+    //      raiz->bit (nó atual) = 4      
+    //      ou seja, a diferença na chave do nó atual é "mais profunda"
+    //      logo a nova chave deve ser inserida
+    //      não achei nos slides algum exemplo de i < raiz->bit
+
+
+    // raiz->bit <= pai->bit ===== ou subiu (<) ou foi para o mesmo (=)
+    if (raiz->bit >= i || raiz->bit <= pai->bit)
     {
-        novoNo = malloc(sizeof(no));
+       no *novoNo = malloc(sizeof(no));
 
         novoNo->chave = chave;
 
@@ -105,8 +102,8 @@ no* insere_rec (no *raiz, unsigned chave, int i, no *pai)
         // bit(chave, i) = 0 -> esquerda = novoNo
         if (bit(chave, i) == 1)
         {
-            novoNo->dir = novoNo;
             novoNo->esq = raiz;
+            novoNo->dir = novoNo;
         }
         else
         {
@@ -132,13 +129,68 @@ no* insere_rec (no *raiz, unsigned chave, int i, no *pai)
 
 }
 
+// função que faz a primeira busca: nó mais parecido
+void insere (no *raiz, unsigned chave)
+{
+    int i;
+
+    // passa o raiz->esq pq a cabeça é dummy 
+    no *retorno_da_busca = busca_rec (raiz->esq, chave, -1);
+
+    if (chave == retorno_da_busca->chave)
+    {
+        printf ("\nElemento ja esta na arvore!");
+        return;
+    }
+
+    // LOOP IMPORTANTE
+    // verificando onde se diferenciam
+    // ex: 001 e 010
+    // -> 1 - somente a posição zero é igual (lembrando que a contagem de bit() é da esquerda pra direita)
+    // a posição 1 é diferente
+    for (i = 0; bit(chave, i) == bit(retorno_da_busca->chave, i); i++);
+
+    // novamente, o raiz->esq é para sair do dummy
+    raiz->esq = insere_rec(raiz->esq, chave, i, raiz);
+
+}
+
+// função para caminhar pelos nós
+void imprimir_rec(no* atual, no *anterior)
+{
+
+    // essa condição serve para verificar se:
+    // subiu 
+    // apontou para o mesmo nó
+    // ou seja, o caminho para imprimir é: sempre deve aumentar o atual->bit, se não: subiu (diminuiu o bit) ou continuou igual
+    if (atual->bit > anterior->bit)
+    {
+        printf ("\n%u", atual->chave);
+
+        imprimir_rec(atual->esq, atual);
+        
+        imprimir_rec(atual->dir, atual);
+        
+    }
+}
+
+// função para imprimir a árvore
+// sempre passa a esquerda (o dummy a esquerda tem nó)
+//  a direita aponta para si mesmo
+void imprimir (no *raiz)
+{
+    imprimir_rec(raiz->esq, raiz);
+}
 
 int main ()
 {
+    no *dummy = criarDummy();
 
+    insere(dummy, 5);
+    insere(dummy, 7);
+    insere(dummy, 3);
 
-
-
+    imprimir(dummy);
 
 
     return 0;
