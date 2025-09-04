@@ -365,7 +365,7 @@ void mergeChildArvoreB (arvB *x, int i) // função merge
 //      insere o elemento do pai no nó filho tbm
 
 
-void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos acima + função merge
+void remover (arvB *x, int k) // a remoção usará os casos acima + função merge
 {
     int i = 0;
 
@@ -430,7 +430,7 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
 
             x->chave[i] = predecessor;              // copiando o valor para o nó pai
 
-            remover(raizInicial, y, predecessor);                // removendo o número original
+            remover(y, predecessor);                // removendo o número original
         }
 
         // b - sucessor
@@ -448,7 +448,7 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
 
             x->chave[i] = sucessor;               // copiando o valor
 
-            remover (raizInicial, z, sucessor);     // removendo o número original
+            remover (z, sucessor);     // removendo o número original
         }
 
 
@@ -457,7 +457,7 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
         {
             mergeChildArvoreB(x, i);                // merge - junta os filhos
 
-            remover(raizInicial, y, k);                          // o k (desceu ao filho_merge) precisa ser removido
+            remover(y, k);                          // o k (desceu ao filho_merge) precisa ser removido
         }
 
         // escrever(x);
@@ -576,27 +576,25 @@ void remover (arvB *raizInicial,arvB *x, int k) // a remoção usará os casos a
             // c - os dois tem t-1 chaves -> merge
             else
             {
-                // esse if serve para evitar que faça merge na raiz da arvore, pois a regra permite que a raiz tenha t-1 chaves
-                if (x != raizInicial)
+                
+                // so para garantir que estamos mesclando vetores existentes
+                if (i < x->n)
                 {
-                        // so para garantir que estamos mesclando vetores existentes
-                    if (i < x->n)
-                    {
-                        mergeChildArvoreB(x, i);
-                    }
-
-                    // evita que faça merge entre: ultimo filho e um filho inexistente
-                    else {
-                        mergeChildArvoreB (x, i-1);
-                    }
+                    mergeChildArvoreB(x, i);
                 }
+
+                // evita que faça merge entre: ultimo filho e um filho inexistente
+                else {
+                    mergeChildArvoreB (x, i-1);
+                }
+                
 
             }
 
         }
 
 
-        remover(raizInicial, filhoAlvo, k);
+        remover(filhoAlvo, k);
     }
 
 }
@@ -609,45 +607,128 @@ int main ()
 {
     arvB *raiz = criarNoRaizInicial();
 
-    raiz = insereArvoreB(raiz, 1);
-
-    raiz = insereArvoreB(raiz, 5);
-
-    raiz = insereArvoreB(raiz, 10);
-
-    raiz = insereArvoreB(raiz, 3);
-
-    raiz = insereArvoreB(raiz, 7);
-
     raiz = insereArvoreB(raiz, 16);
 
-    raiz = insereArvoreB(raiz, 6);
+    raiz = insereArvoreB(raiz, 29);
 
-    raiz = insereArvoreB(raiz, 8);
+    raiz = insereArvoreB(raiz, 27);
 
-    raiz = insereArvoreB(raiz, 9);
-    
-    raiz = insereArvoreB(raiz, 12);
+    raiz = insereArvoreB(raiz, 21);
+
+    raiz = insereArvoreB(raiz, 13);
+
+    raiz = insereArvoreB(raiz, 22);
 
     raiz = insereArvoreB(raiz, 18);
 
-    raiz = insereArvoreB(raiz, 17);
+    raiz = insereArvoreB(raiz, 30);
 
-    raiz = insereArvoreB(raiz, 20);  
+    raiz = insereArvoreB(raiz, 32);
     
-    raiz = insereArvoreB(raiz, 21); 
+    raiz = insereArvoreB(raiz, 33);
 
-    raiz = insereArvoreB(raiz, 14); 
+    raiz = insereArvoreB(raiz, 23);
+
+    raiz = insereArvoreB(raiz, 28);
+
+    raiz = insereArvoreB(raiz, 24);  
+    
+    raiz = insereArvoreB(raiz, 26); 
+
+    raiz = insereArvoreB(raiz, 11);
+    
+    raiz = insereArvoreB(raiz, 12);
+
+    raiz = insereArvoreB(raiz, 34);
+
+    raiz = insereArvoreB(raiz, 35);
+
+    raiz = insereArvoreB(raiz, 14);
+
+    raiz = insereArvoreB(raiz, 36);
+
+    raiz = insereArvoreB(raiz, 15);
 
     imprimir(raiz);
 
-    remover(raiz, raiz, 16);
+    /* fazendo o exercicio de remocao do slide 
+    
+    
+    IMPORTANTE
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    imprimir(raiz);
+    antes de iniciar o exercicio, altere o valor de b para 5
+    
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    */
 
-    remover(raiz, raiz, 7);
+/*     printf ("\n\nEXERCICIO DO SLIDE:\n");
 
-    imprimir(raiz);
+    arvB *raiz2 = criarNoRaizInicial();
+    raiz2->n = 5;
+    raiz2->folha = false;
+    raiz2->chave[0] = 15;
+    raiz2->chave[1] = 22;
+    raiz2->chave[2] = 26;
+    raiz2->chave[3] = 30;
+    raiz2->chave[4] = 34;
+
+    arvB *filho0 = criarNoRaizInicial();
+    filho0->n = 2;
+    filho0->folha = true;
+    filho0->chave[0] = 11;
+    filho0->chave[1] = 13;
+
+    arvB *filho1 = criarNoRaizInicial();
+    filho1->n = 2;
+    filho1->folha = true;
+    filho1->chave[0] = 20;
+    filho1->chave[1] = 21;
+
+    arvB *filho2 = criarNoRaizInicial();
+    filho2->n = 2;
+    filho2->folha = true;
+    filho2->chave[0] = 24;
+    filho2->chave[1] = 25;
+
+    arvB *filho3 = criarNoRaizInicial();
+    filho3->n = 3;
+    filho3->folha = true;
+    filho3->chave[0] = 27;
+    filho3->chave[1] = 28;
+    filho3->chave[2] = 29;
+
+    arvB *filho4 = criarNoRaizInicial();
+    filho4->n = 2;
+    filho4->folha = true;
+    filho4->chave[0] = 31;
+    filho4->chave[1] = 32;
+
+    arvB *filho5 = criarNoRaizInicial();
+    filho5->n = 2;
+    filho5->folha = true;
+    filho5->chave[0] = 35;
+    filho5->chave[1] = 36;
+
+    raiz2->filho[0] = filho0;
+    raiz2->filho[1] = filho1;
+    raiz2->filho[2] = filho2;
+    raiz2->filho[3] = filho3;
+    raiz2->filho[4] = filho4;
+    raiz2->filho[5] = filho5;
+
+    imprimir(raiz2);
+
+    // REMOVENDO O 13, 26 e 22
+
+    remover(raiz2, 13);
+
+    remover(raiz2, 26);
+
+    remover(raiz2, 22);
+
+    imprimir(raiz2);
+ */
 
 
     return 0;
