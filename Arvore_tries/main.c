@@ -22,7 +22,7 @@ no* criarNo (unsigned chave)
 {
     no *novoNo = malloc (sizeof(no));
 
-    novoNo->folha = 1;
+    novoNo->folha = true;
     novoNo->chave = chave;
     novoNo->dir = NULL;
     novoNo->esq = NULL;
@@ -63,34 +63,33 @@ no* insere_rec (no *raiz, unsigned chave, int nivel)
         unsigned chave_intermediaria = (raiz->chave + chave) / 2;
 
         no *intermediador = criarNo(chave_intermediaria);
-        intermediador->folha = 0;
+        intermediador->folha = false;
 
-        // se o bit da chave (considerando o nivel) for 0, significa que o novo nó iria para a esquerda
-        // logo criamos um nó intermediário 
-        // esq -> novo no
-        // dir -> raiz
-        if (bit(chave, nivel) == 0)
+        // criamos o intermediador
+        // e a partir dele inserimos na árvore
+        // entao, verificamos se a chave (da raiz atual) iria para a esquerda ou direita do nivel 
+        if (bit(raiz->chave, nivel) == 0)
         {
-            no *novoNo = criarNo(chave);
-
-            intermediador->esq = novoNo;
-
-            intermediador->dir = raiz;
-            
+                intermediador->esq = insere_rec (intermediador->esq, raiz->chave, nivel + 1);
         }
-
-        // se for 1 o bit, significa que o novo nó iria pra direita
-        // esq -> raiz
-        // dir -> novo nó
         else
         {
-            no *novoNo = criarNo(chave);
-
-            intermediador->esq = raiz;
-
-            intermediador->dir = novoNo;
-
+                intermediador->dir = insere_rec (intermediador->dir, raiz->chave, nivel + 1);
         }
+
+
+        // fazemos o mesmo com a nova chave
+        if (bit(chave, nivel) == 0)
+        {
+                intermediador->esq = insere_rec (intermediador->esq, chave, nivel + 1);
+        }
+        else
+        {
+                intermediador->dir = insere_rec (intermediador->dir, chave, nivel + 1);
+        }
+
+        // apagamos a raiz 
+        free (raiz);
 
         return intermediador;
 
@@ -148,16 +147,15 @@ int main ()
 {
     no *raiz = NULL;
 
-    raiz = inserir(raiz, 5);
-
-    raiz = inserir(raiz, 10);
-
-    raiz = inserir(raiz, 1);
+    raiz = inserir(raiz, 3);
 
     raiz = inserir(raiz, 12);
 
-    raiz = inserir(raiz, 3);
-    
+    raiz = inserir(raiz, 1);
+
+    raiz = inserir(raiz, 5);
+
+    raiz = inserir(raiz, 9);
 
     imprimir(raiz);
 
