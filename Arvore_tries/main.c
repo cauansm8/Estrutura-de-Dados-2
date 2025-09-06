@@ -36,6 +36,46 @@ unsigned bit (unsigned chave, int nivel)
     return chave >> (bits_na_chave - nivel - 1) & 1;
 }
 
+no* busca_rec(no *raiz, unsigned chave, int nivel)
+{
+    if (raiz == NULL)
+    {
+        return NULL;
+    }
+
+    if (raiz->folha == true && raiz->chave == chave)
+    {
+        return raiz;
+    }
+
+    if (bit(chave, nivel) == 0)
+    {
+        return busca_rec (raiz->esq, chave, nivel + 1);
+    }
+    else
+    {
+        return busca_rec (raiz->dir, chave, nivel + 1);
+    }
+
+
+}
+
+no* busca (no *raiz, unsigned chave)
+{
+    no *t = busca_rec (raiz, chave, 0);
+
+    if (t == NULL)
+    {
+        printf ("\nelemento nao encontrado, retornando null");
+
+        return NULL;
+    }
+
+    printf ("\nelemento encontrado");
+    return t;
+}
+
+
 
 // função de inserção
 no* insere_rec (no *raiz, unsigned chave, int nivel)
