@@ -4,6 +4,12 @@
 
 /* 
 A árvore trie somente tem conteúdo válido em nós folhas!
+
+busca - normal
+insercao - adiciona um no intermediario e faz a insercao da raiz->chave e novoNo->chave
+remocao - como todos os nós importantes são folhas, é só dar free e retornar null
+impressao - normal (só imprime aquilo que é folha)
+
 */
 
 #define bits_na_chave 4
@@ -158,6 +164,43 @@ no* inserir (no *raiz, unsigned chave)
     return raiz;
 }
 
+no* remover_rec (no *raiz, unsigned chave, int nivel)
+{
+    if (raiz == NULL)
+    {
+        printf ("\nElemento nao encontrado!");
+        return NULL;
+    }
+
+
+    // as chaves sempre estarao em folhas, logo, só apagar e retornar null
+    if (raiz->chave == chave)
+    {
+        free (raiz);
+
+        return NULL;
+    }
+
+    if (bit(chave, nivel) == 0)
+    {
+        raiz->esq = remover_rec (raiz->esq, chave, nivel + 1);
+    }
+    else
+    {
+        raiz->dir = remover_rec (raiz->dir, chave, nivel + 1);
+    }
+
+    return raiz;
+}
+
+
+no* remover (no *raiz, unsigned chave)
+{
+    raiz = remover_rec (raiz, chave, 0);
+
+    return raiz;
+}
+
 
 // função para imprimir
 void imprimir_rec (no *raiz, int nivel)
@@ -196,6 +239,10 @@ int main ()
     raiz = inserir(raiz, 5);
 
     raiz = inserir(raiz, 9);
+
+    imprimir(raiz);
+
+    raiz = remover (raiz, 1);
 
     imprimir(raiz);
 
