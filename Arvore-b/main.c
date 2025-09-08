@@ -135,7 +135,7 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     y->n = t-1;
 
     // passa os filhos a direita de i para a direta
-    for (int j = x->n + 1; j >= i + 1; j--)
+    for (int j = x->n; j >= i + 1; j--)
     {
         x->filho[j+1] = x->filho[j];
     }
@@ -365,7 +365,7 @@ void mergeChildArvoreB (arvB *x, int i) // função merge
 //      insere o elemento do pai no nó filho tbm
 
 
-void remover (arvB *x, int k) // a remoção usará os casos acima + função merge
+void remover_rec (arvB *x, int k) // a remoção usará os casos acima + função merge
 {
     int i = 0;
 
@@ -430,7 +430,7 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
 
             x->chave[i] = predecessor;              // copiando o valor para o nó pai
 
-            remover(y, predecessor);                // removendo o número original
+            remover_rec(x->filho[i], predecessor);                // removendo o número original
         }
 
         // b - sucessor
@@ -448,7 +448,7 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
 
             x->chave[i] = sucessor;               // copiando o valor
 
-            remover (z, sucessor);     // removendo o número original
+            remover_rec (x->filho[i+1], sucessor);     // removendo o número original
         }
 
 
@@ -457,7 +457,7 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
         {
             mergeChildArvoreB(x, i);                // merge - junta os filhos
 
-            remover(y, k);                          // o k (desceu ao filho_merge) precisa ser removido
+            remover_rec(y, k);                          // o k (desceu ao filho_merge) precisa ser removido
         }
 
         // escrever(x);
@@ -594,9 +594,24 @@ void remover (arvB *x, int k) // a remoção usará os casos acima + função me
         }
 
 
-        remover(filhoAlvo, k);
+        remover_rec(filhoAlvo, k);
     }
 
+}
+
+
+// "nova função" - criada para atualizar a raiz
+// as vezes o o nó raiz sofria merge e a raiz não se atualizava
+arvB* remover(arvB *raiz, int k)
+{
+    remover_rec (raiz, k);
+
+    if (raiz->n == 0)
+    {
+        raiz = raiz->filho[0];
+    }
+    
+    return raiz;
 }
 
 
@@ -649,87 +664,7 @@ int main ()
 
     raiz = insereArvoreB(raiz, 15);
 
-    imprimir(raiz);
-
-    /* fazendo o exercicio de remocao do slide 
-    
-    
-    IMPORTANTE
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    antes de iniciar o exercicio, altere o valor de b para 5
-    
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    */
-
-/*     printf ("\n\nEXERCICIO DO SLIDE:\n");
-
-    arvB *raiz2 = criarNoRaizInicial();
-    raiz2->n = 5;
-    raiz2->folha = false;
-    raiz2->chave[0] = 15;
-    raiz2->chave[1] = 22;
-    raiz2->chave[2] = 26;
-    raiz2->chave[3] = 30;
-    raiz2->chave[4] = 34;
-
-    arvB *filho0 = criarNoRaizInicial();
-    filho0->n = 2;
-    filho0->folha = true;
-    filho0->chave[0] = 11;
-    filho0->chave[1] = 13;
-
-    arvB *filho1 = criarNoRaizInicial();
-    filho1->n = 2;
-    filho1->folha = true;
-    filho1->chave[0] = 20;
-    filho1->chave[1] = 21;
-
-    arvB *filho2 = criarNoRaizInicial();
-    filho2->n = 2;
-    filho2->folha = true;
-    filho2->chave[0] = 24;
-    filho2->chave[1] = 25;
-
-    arvB *filho3 = criarNoRaizInicial();
-    filho3->n = 3;
-    filho3->folha = true;
-    filho3->chave[0] = 27;
-    filho3->chave[1] = 28;
-    filho3->chave[2] = 29;
-
-    arvB *filho4 = criarNoRaizInicial();
-    filho4->n = 2;
-    filho4->folha = true;
-    filho4->chave[0] = 31;
-    filho4->chave[1] = 32;
-
-    arvB *filho5 = criarNoRaizInicial();
-    filho5->n = 2;
-    filho5->folha = true;
-    filho5->chave[0] = 35;
-    filho5->chave[1] = 36;
-
-    raiz2->filho[0] = filho0;
-    raiz2->filho[1] = filho1;
-    raiz2->filho[2] = filho2;
-    raiz2->filho[3] = filho3;
-    raiz2->filho[4] = filho4;
-    raiz2->filho[5] = filho5;
-
-    imprimir(raiz2);
-
-    // REMOVENDO O 13, 26 e 22
-
-    remover(raiz2, 13);
-
-    remover(raiz2, 26);
-
-    remover(raiz2, 22);
-
-    imprimir(raiz2);
- */
-
+    imprimir (raiz);
 
     return 0;
 }
