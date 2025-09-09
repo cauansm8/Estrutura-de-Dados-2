@@ -50,16 +50,6 @@ arvB* criarNoRaizInicial()
 }
 
 
-/* void leitura (arvB *r) // desenvolver
-{
-
-}
-
-void escrita (arvB *r) // desenvolver
-{
-    
-} */
-
 arvB* buscarArv (arvB *r, int k)
 {
     int i = 0;
@@ -90,16 +80,12 @@ arvB* buscarArv (arvB *r, int k)
     // se não é folha (tem filhos), continua a busca pelo nó filho 
     else
     {
-        //leitura (r->filho[i]);
         return buscarArv (r->filho[i], k);
     }
 }
 
 
 
-// **********************************************
-//  TESTAR OS LOOPS PARA ENTENDER MELHOR OS VALORES
-// **********************************************
 void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai e o índice do filho que será dividido
 {
     // novo nó
@@ -152,10 +138,6 @@ void splitChildArvoreB (arvB *x, int i) // função de split -> recebe o nó pai
     // inserindo a mediana e atualizando o valor de n
     x->chave[i] = y->chave[t-1];
     x->n++;
-
-    //escrever(x);
-    //escrever(y);
-    //escrever(z);
 
 }
 
