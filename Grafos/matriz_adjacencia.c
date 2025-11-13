@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "PilhasFilas/GrMatriz.c"
 /*
 
-Grafos com matriz!
+funções não testadas e que não estão nos slides:
 
-    -> Grafos dirigidos / digrafos - temos arcos
-    -> Em grafos - temos arestas
+    busca em profundidade (com pilha e fila)
 
 */
 
@@ -177,17 +176,6 @@ void imprimirRecomendacoes(grafo *g, int u)
     }
 }
 
-
-
-
-/* 
- ***********************************
-entender melhor os dois algoritmos baixo
-
-
-*/
-
-
 int existe_caminho(grafo *g, int s, int t)
 {
     int encontrou, *visitado = malloc(g->n * sizeof(int));
@@ -196,7 +184,7 @@ int existe_caminho(grafo *g, int s, int t)
     {
         visitado[i] = 0;
     }
-        
+
     encontrou = busca_rec(g, visitado, s, t);
 
     free(visitado);
@@ -207,17 +195,17 @@ int existe_caminho(grafo *g, int s, int t)
 int busca_rec(grafo *g, int *visitado, int v, int t)
 {
     int w;
-    
+
     if (v == t)
     {
-        return 1; 
+        return 1;
     }
-        
+
     visitado[v] = 1;
-    
+
     for (w = 0; w < g->n; w++)
     {
-        if (g->adj[v][w] && !visitado[w])
+        if (g->adj[v][w] == 1 && visitado[w] == 0)
         {
             if (busca_rec(g, visitado, w, t) == 1)
             {
@@ -229,30 +217,91 @@ int busca_rec(grafo *g, int *visitado, int v, int t)
     return 0;
 }
 
-// imprimindo matriz inteira
-void imprimindoMatriz(grafo *g)
+int *busca_em_profundidadePilha(grafo *g, int s)
 {
-    printf("\nImprimindo matriz\n");
-
-    printf("    ");
-
-    for (int i = 0; i < g->n; i++)
+   
+    int *pai = malloc(g->n * sizeof(int));
+    
+    int *visitado = malloc(g->n * sizeof(int));
+    
+    pilhaMatriz *p = criar_pilha();
+    
+    for (int v = 0; v < g->n; v++)
     {
-        printf("%d  ", i);
+        pai[v] = -1;
+        visitado[v] = 0;
     }
-
-    printf("\n");
-
-    for (int i = 0; i < g->n; i++)
+    
+    empilhar(p, s);
+    
+    pai[s] = s;
+    
+    while (pilha_vazia(p) == false)
     {
-        printf("%d - ", i);
-
-        for (int j = 0; j < g->n; j++)
+        int v = desempilhar(p);
+        
+        visitado[v] = 1;
+        
+        for (int w = 0; w < g->n; w++)
         {
-            printf("%d  ", g->adj[i][j]);
+            if (g->adj[v][w] && !visitado[w])
+            {
+                pai[w] = v;
+                empilhar(p, w);
+            }
         }
-        printf("\n");
+            
     }
+
+    destroi_pilha(p);
+    
+    free(visitado);
+    
+    return pai;
+}
+
+int *busca_em_profundidadeFila(grafo *g, int s)
+{
+    
+    int *pai = malloc(g->n * sizeof(int));
+    
+    int *visitado = malloc(g->n * sizeof(int));
+    
+    filaMatriz *f = criarFila();
+    
+    for (int v = 0; v < g->n; v++)
+    {
+        pai[v] = -1;
+        visitado[v] = 0;
+    }
+    
+    enfileirar(f, s);
+    
+    pai[s] = s;
+
+    visitado[s] = 1;
+    
+    while (fila_vazia(f) == false)
+    {
+        int v = desenfileirar(f);
+        
+        for (int w = 0; w < g->n; w++)
+        {
+            if (g->adj[v][w] && !visitado[w])
+            {
+                visitado[v] = 1;
+                pai[w] = v;
+                enfileirar(f, w);
+            }
+        }
+            
+    }
+
+    destroi_fila(f);
+    
+    free(visitado);
+    
+    return pai;
 }
 
 int main()

@@ -1,35 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "PilhasFilas/GrLista.c"
 
-
-/* 
+/*
 
 funções não testadas e que não estão nos slides:
     int grau
     int mais popular
     void imprimirRecomendacoes
 
-
+    busca em profundidade (com pilha e fila)
 */
 
 
-// estrutura do nó
-typedef struct noGrafo
-{
 
-    int m;
-    noGrafo *prox;
 
-} noGrafo;
-
-// estrutura do grafo
-typedef struct grafo
-{
-
-    int n;
-    noGrafo **adj;
-
-} grafo;
 
 // cria nó
 noGrafo *insere_na_lista(int m, noGrafo *lista)
@@ -208,14 +193,13 @@ void imprimirRecomendacoes(grafo *g, int u)
     while (aux != NULL)
     {
         noGrafo *amigo = g->adj[aux->m];
-        
+
         while (amigo != NULL)
         {
             if (tem_aresta(g, u, amigo->m) == 0 && amigo->m != u)
             {
                 printf("\n(%d)", amigo->m);
             }
-
 
             amigo = amigo->prox;
         }
@@ -224,25 +208,17 @@ void imprimirRecomendacoes(grafo *g, int u)
     }
 }
 
-/* 
-**************
-entender melhor esse dois algoritmos abaixo
-
-
-
-*/
-
-
-int* encontra_componentes(grafo *g)
+// separa cada componente conexa em grupos diferentes
+int *encontra_componentes(grafo *g)
 {
-    int s, c = 0, *componentes = malloc(g->n * sizeof(int));
-    
-    for (s = 0; s < g->n; s++)
+    int c = 0, *componentes = malloc(g->n * sizeof(int));
+
+    for (int s = 0; s < g->n; s++)
     {
         componentes[s] = -1;
     }
-        
-    for (s = 0; s < g->n; s++)
+
+    for (int s = 0; s < g->n; s++)
     {
         if (componentes[s] == -1)
         {
@@ -250,10 +226,11 @@ int* encontra_componentes(grafo *g)
             c++;
         }
     }
-        
+
     return componentes;
 }
 
+// busca em profundidade para o algoritmo encontra_componentes()
 void visita_rec(grafo *g, int *componentes, int comp, int v)
 {
     componentes[v] = comp;
@@ -265,8 +242,148 @@ void visita_rec(grafo *g, int *componentes, int comp, int v)
             visita_rec(g, componentes, comp, t->m);
         }
     }
-        
 }
+
+// guarda os pais de cada elemento
+int *encontra_caminhos(grafo *g, int s)
+{
+    int *pai = malloc(g->n * sizeof(int));
+
+    for (int i = 0; i < g->n; i++)
+    {
+        pai[i] = -1;
+    }
+
+    busca_em_profundidade(g, pai, s, s);
+
+    return pai;
+}
+
+// busca em profundidade para o algoiritmo encontra_caminhos()
+void busca_em_profundidade(grafo *g, int *pais, int pai, int atual)
+{
+    pais[atual] = pai;
+
+    for (noGrafo *t = g->adj[atual]; t != NULL; t = t->prox)
+    {
+        if (pais[t->m] == -1)
+        {
+            busca_em_profundidade(g, pais, atual, t->m);
+        }
+    }
+}
+
+// imprime o caminho ao contrário (destino retornando para raiz)
+void imprimir_caminho_reverso(int destino, int *pai)
+{
+    printf("%d", destino);
+
+    if (pai[destino] != destino)
+    {
+        imprimi_caminho_reverso(pai[destino], pai);
+    }       
+}
+
+// imprime o caminho direto (raiz até destino)
+void imprimir_caminho(int destino, int *pai)
+{
+    if (pai[destino] != destino)
+    {
+        imprimi_caminho(pai[destino], pai);
+    }
+        
+    printf("%d", destino);
+}
+
+
+int *busca_em_profundidadePilha(grafo *g, int s)
+{
+   
+    int *pai = malloc(g->n * sizeof(int));
+    
+    int *visitado = malloc(g->n * sizeof(int));
+    
+    pilhaLista *p = criar_pilha();
+    
+    for (int v = 0; v < g->n; v++)
+    {
+        pai[v] = -1;
+        visitado[v] = 0;
+    }
+    
+    empilhar(p, g->adj[s]);
+    
+    pai[s] = s;
+    
+    while (pilha_vazia(p) == false)
+    {
+        int v = desempilhar(p);
+        
+        visitado[v] = 1;
+        
+        for (int w = 0; w < g->n; w++)
+        {
+            if (tem_aresta(g, v, w) && !visitado[w])
+            {
+                pai[w] = v;
+                empilhar(p, g->adj[w]);
+            }
+        }
+            
+    }
+
+    destroi_pilha(p);
+    
+    free(visitado);
+    
+    return pai;
+}
+
+
+int *busca_em_profundidadeFila(grafo *g, int s)
+{
+    
+    int *pai = malloc(g->n * sizeof(int));
+    
+    int *visitado = malloc(g->n * sizeof(int));
+    
+    filaLista *f = criarFila();
+    
+    for (int v = 0; v < g->n; v++)
+    {
+        pai[v] = -1;
+        visitado[v] = 0;
+    }
+    
+    enfileirar(f, g->adj[s]);
+    
+    pai[s] = s;
+    
+    visitado[s] = 1;
+
+    while (fila_vazia(f) == false)
+    {
+        int v = desenfileirar(f);
+        
+        for (int w = 0; w < g->n; w++)
+        {
+            if (tem_aresta(g, v, w) && !visitado[w])
+            {
+                visitado[v] = 1;
+                pai[w] = v;
+                enfileirar(f, g->adj[w]);
+            }
+        }
+            
+    }
+
+    destroi_fila(f);
+    
+    free(visitado);
+    
+    return pai;
+}
+
 
 int main()
 {
