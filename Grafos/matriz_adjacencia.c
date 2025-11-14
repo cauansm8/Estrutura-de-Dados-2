@@ -9,6 +9,19 @@ funções não testadas e que não estão nos slides:
 
 */
 
+
+/* 
+
+    para representar matriz de adjacência com pesos nas arestas:
+            há conexão: valor peso
+            não há conexâo: 0 ou -1
+
+            mas precisa alterar algumas lógicas das funções implementadas
+
+*/
+
+
+
 // estrutura do grafo
 typedef struct
 {

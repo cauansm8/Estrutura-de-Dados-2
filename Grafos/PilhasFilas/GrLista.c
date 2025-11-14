@@ -9,6 +9,7 @@ estrutura pilha e fila para grafo de lista de adjacência
 typedef struct noGrafo
 {
 
+    int peso;
     int m;
     noGrafo *prox;
 

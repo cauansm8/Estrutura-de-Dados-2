@@ -12,15 +12,12 @@ funções não testadas e que não estão nos slides:
     busca em profundidade (com pilha e fila)
 */
 
-
-
-
-
 // cria nó
-noGrafo *insere_na_lista(int m, noGrafo *lista)
+noGrafo *insere_na_lista(int m, noGrafo *lista, int peso)
 {
     noGrafo *novoNo = malloc(sizeof(noGrafo));
 
+    novoNo->peso = peso;
     novoNo->m = m;
     novoNo->prox = lista;
 
@@ -68,10 +65,10 @@ void destroi_grafo(grafo *g)
 }
 
 // inserindo no grafo
-void insere_aresta(grafo *g, int u, int v)
+void insere_aresta(grafo *g, int u, int v, int peso)
 {
-    g->adj[v] = criarNo(u, g->adj[v]);
-    g->adj[u] = criarNo(v, g->adj[u]);
+    g->adj[v] = insere_na_lista(u, g->adj[v], peso);
+    g->adj[u] = insere_na_lista(v, g->adj[u], peso);
 }
 
 // removendo da lista
@@ -222,7 +219,7 @@ int *encontra_componentes(grafo *g)
     {
         if (componentes[s] == -1)
         {
-            visita_rec(g, componentes, c, s);
+            visita_recursiva_conexas(g, componentes, c, s);
             c++;
         }
     }
@@ -231,7 +228,7 @@ int *encontra_componentes(grafo *g)
 }
 
 // busca em profundidade para o algoritmo encontra_componentes()
-void visita_rec(grafo *g, int *componentes, int comp, int v)
+void visita_recursiva_conexas(grafo *g, int *componentes, int comp, int v)
 {
     componentes[v] = comp;
 
@@ -239,7 +236,7 @@ void visita_rec(grafo *g, int *componentes, int comp, int v)
     {
         if (componentes[t->m] == -1)
         {
-            visita_rec(g, componentes, comp, t->m);
+            visita_recursiva_conexas(g, componentes, comp, t->m);
         }
     }
 }
@@ -281,7 +278,7 @@ void imprimir_caminho_reverso(int destino, int *pai)
     if (pai[destino] != destino)
     {
         imprimi_caminho_reverso(pai[destino], pai);
-    }       
+    }
 }
 
 // imprime o caminho direto (raiz até destino)
@@ -291,36 +288,35 @@ void imprimir_caminho(int destino, int *pai)
     {
         imprimi_caminho(pai[destino], pai);
     }
-        
+
     printf("%d", destino);
 }
 
-
 int *busca_em_profundidadePilha(grafo *g, int s)
 {
-   
+
     int *pai = malloc(g->n * sizeof(int));
-    
+
     int *visitado = malloc(g->n * sizeof(int));
-    
+
     pilhaLista *p = criar_pilha();
-    
+
     for (int v = 0; v < g->n; v++)
     {
         pai[v] = -1;
         visitado[v] = 0;
     }
-    
+
     empilhar(p, g->adj[s]);
-    
+
     pai[s] = s;
-    
+
     while (pilha_vazia(p) == false)
     {
         int v = desempilhar(p);
-        
+
         visitado[v] = 1;
-        
+
         for (int w = 0; w < g->n; w++)
         {
             if (tem_aresta(g, v, w) && !visitado[w])
@@ -329,42 +325,40 @@ int *busca_em_profundidadePilha(grafo *g, int s)
                 empilhar(p, g->adj[w]);
             }
         }
-            
     }
 
     destroi_pilha(p);
-    
+
     free(visitado);
-    
+
     return pai;
 }
 
-
 int *busca_em_profundidadeFila(grafo *g, int s)
 {
-    
+
     int *pai = malloc(g->n * sizeof(int));
-    
+
     int *visitado = malloc(g->n * sizeof(int));
-    
+
     filaLista *f = criarFila();
-    
+
     for (int v = 0; v < g->n; v++)
     {
         pai[v] = -1;
         visitado[v] = 0;
     }
-    
+
     enfileirar(f, g->adj[s]);
-    
+
     pai[s] = s;
-    
+
     visitado[s] = 1;
 
     while (fila_vazia(f) == false)
     {
         int v = desenfileirar(f);
-        
+
         for (int w = 0; w < g->n; w++)
         {
             if (tem_aresta(g, v, w) && !visitado[w])
@@ -374,16 +368,50 @@ int *busca_em_profundidadeFila(grafo *g, int s)
                 enfileirar(f, g->adj[w]);
             }
         }
-            
     }
 
     destroi_fila(f);
-    
+
     free(visitado);
-    
+
     return pai;
 }
 
+void ordenacao_topologica(grafo *g)
+{
+    int *visitado = malloc(g->n * sizeof(int));
+    for (int s = 0; s < g->n; s++)
+    {
+        visitado[s] = 0;
+    }
+        
+    for (int s = 0; s < g->n; s++)
+    {
+        if (visitado[s] == 0)
+        {
+            visita_recursiva_topologica(g, visitado, s);
+        }
+            
+    }
+        
+    free(visitado);
+    printf("\n");
+}
+
+void visita_recursiva_topologica(grafo *g, int *visitado, int v)
+{
+    visitado[v] = 1;
+    for (noGrafo *t = g->adj[v]; t != NULL; t = t->prox)
+    {
+        if (visitado[t->m] == 0)
+        {
+            visita_recursiva_topologica(g, visitado, t->m);
+        }
+            
+    }
+        
+    printf("%d ", v);
+}
 
 int main()
 {
