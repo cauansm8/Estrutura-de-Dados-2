@@ -100,6 +100,8 @@ void printar_Pilha (pilhaLista *p)
 {
     noLista *aux = p->topo;
 
+    printf ("\npilha: ");
+
     while (aux != NULL)
     {
         printf ("%d  ", aux->vertice);
@@ -192,6 +194,8 @@ void destroi_fila (filaLista *f)
 void printar_Fila (filaLista *f)
 {
     noLista *aux = f->inicio;
+
+    printf ("\nfila: ");
 
     while (aux != NULL)
     {

@@ -2,15 +2,6 @@
 #include <stdlib.h>
 #include "PilhasFilas/GrLista.c"
 
-/*
-
-funções não testadas e que não estão nos slides:
-    int grau
-    int mais popular
-    void imprimirRecomendacoes
-
-    busca em profundidade (com pilha e fila)
-*/
 
 // cria nó
 noGrafo *insere_na_lista(int m, noGrafo *lista, int peso)
@@ -403,6 +394,7 @@ void visita_recursiva_topologica(grafo *g, int *visitado, int v)
 void ordenacao_topologica(grafo *g)
 {
     int *visitado = malloc(g->n * sizeof(int));
+    
     for (int s = 0; s < g->n; s++)
     {
         visitado[s] = 0;
@@ -431,14 +423,14 @@ int main()
     insere_aresta(g, 0, 3, 1);
     insere_aresta(g, 3, 1, 4);
 
-    int *retorno = busca_em_larguraFila(g, 0);
-
-    printf ("\n\n\n");
+    int *resultado = encontra_caminhos(g, 0);
 
     for (int i = 0; i < 4; i++)
     {
-        printf ("%d   ", retorno[i]);
+        printf ("\n%d", resultado[i]);
     }
+
+    destroi_grafo(g);
 
     return 0;
 }

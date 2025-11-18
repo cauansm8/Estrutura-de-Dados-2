@@ -1,13 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "PilhasFilas/GrMatriz.c"
-/*
-
-funções não testadas e que não estão nos slides:
-
-    busca em profundidade (com pilha e fila)
-
-*/
 
 
 /* 
@@ -189,6 +182,30 @@ void imprimirRecomendacoes(grafo *g, int u)
     }
 }
 
+int busca_rec(grafo *g, int *visitado, int v, int t)
+{
+
+    if (v == t)
+    {
+        return 1;
+    }
+
+    visitado[v] = 1;
+
+    for (int w = 0; w < g->n; w++)
+    {
+        if (g->adj[v][w] == 1 && visitado[w] == 0)
+        {
+            if (busca_rec(g, visitado, w, t) == 1)
+            {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
 int existe_caminho(grafo *g, int s, int t)
 {
     int encontrou, *visitado = malloc(g->n * sizeof(int));
@@ -205,29 +222,55 @@ int existe_caminho(grafo *g, int s, int t)
     return encontrou;
 }
 
-int busca_rec(grafo *g, int *visitado, int v, int t)
+// busca em profundidade para o algoiritmo encontra_caminhos()
+void busca_em_profundidade(grafo *g, int *pais, int pai, int atual)
 {
-    int w;
+    pais[atual] = pai;
 
-    if (v == t)
+    for (int i = 0; i < g->n; i++)
     {
-        return 1;
-    }
-
-    visitado[v] = 1;
-
-    for (w = 0; w < g->n; w++)
-    {
-        if (g->adj[v][w] == 1 && visitado[w] == 0)
+        if (g->adj[atual][i] == 1 && pais[i] == -1)
         {
-            if (busca_rec(g, visitado, w, t) == 1)
-            {
-                return 1;
-            }
+            busca_em_profundidade(g, pais, atual, i);
         }
     }
+}
 
-    return 0;
+// guarda os pais de cada elemento
+int *encontra_caminhos(grafo *g, int s)
+{
+    int *pai = malloc(g->n * sizeof(int));
+
+    for (int i = 0; i < g->n; i++)
+    {
+        pai[i] = -1;
+    }
+
+    busca_em_profundidade(g, pai, s, s);
+
+    return pai;
+}
+
+// imprime o caminho ao contrário (destino retornando para raiz)
+void imprimir_caminho_reverso(int destino, int *pai)
+{
+    printf("%d", destino);
+
+    if (pai[destino] != destino)
+    {
+        imprimir_caminho_reverso(pai[destino], pai);
+    }
+}
+
+// imprime o caminho direto (raiz até destino)
+void imprimir_caminho(int destino, int *pai)
+{
+    if (pai[destino] != destino)
+    {
+        imprimir_caminho(pai[destino], pai);
+    }
+
+    printf("%d", destino);
 }
 
 int *busca_em_profundidadePilha(grafo *g, int s)
@@ -237,7 +280,7 @@ int *busca_em_profundidadePilha(grafo *g, int s)
     
     int *visitado = malloc(g->n * sizeof(int));
     
-    pilhaMatriz *p = criar_pilha();
+    pilhaMatriz *p = criarPilha();
     
     for (int v = 0; v < g->n; v++)
     {
@@ -263,7 +306,8 @@ int *busca_em_profundidadePilha(grafo *g, int s)
                 empilhar(p, w);
             }
         }
-            
+         
+        printar_Pilha(p);
     }
 
     destroi_pilha(p);
@@ -273,7 +317,7 @@ int *busca_em_profundidadePilha(grafo *g, int s)
     return pai;
 }
 
-int *busca_em_profundidadeFila(grafo *g, int s)
+int *busca_em_larguraFila(grafo *g, int s)
 {
     
     int *pai = malloc(g->n * sizeof(int));
@@ -307,6 +351,8 @@ int *busca_em_profundidadeFila(grafo *g, int s)
                 enfileirar(f, w);
             }
         }
+
+        printar_Fila(f);
             
     }
 
@@ -317,11 +363,44 @@ int *busca_em_profundidadeFila(grafo *g, int s)
     return pai;
 }
 
+void imprimirMatriz (grafo *g)
+{
+
+    printf ("/ ");
+
+    for (int i = 0; i < g->n; i++)
+    {
+        printf ("%d  ", i);
+    }
+
+    printf ("\n");
+    for (int i = 0; i < g->n; i++)
+    {
+        printf ("%d ", i);
+        for (int j = 0; j < g->n; j++)
+        {
+            printf ("%d  ", g->adj[i][j]);
+        }
+        printf ("\n");
+    }
+}
+
 int main()
 {
-    grafo *g = ler_grafo();
+    grafo *g = criarGrafo(4);
 
-    imprimindoMatriz(g);
+    insereAresta(g, 0, 2);
+    insereAresta(g, 0, 3);
+    insereAresta(g, 3, 1);
+
+    imprimirMatriz(g);
+
+    int *resultado = busca_em_larguraFila(g, 0);
+
+    for (int i = 0; i < 4; i++)
+    {
+        printf ("\n%d", resultado[i]);
+    }
 
     destruirGrafo(g);
 

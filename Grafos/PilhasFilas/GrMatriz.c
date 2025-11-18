@@ -6,10 +6,10 @@ estrutura pilha e fila para grafo de matriza de adjacência
 */
 
 
-typedef struct{
+typedef struct noMatriz{
 
     int numero;
-    noMatriz *prox;
+    struct noMatriz *prox;
 
 }noMatriz;
 
@@ -25,7 +25,7 @@ pilhaMatriz* criarPilha()
 
     p->topo = NULL;
 
-    return 0;
+    return p;
 }
 
 void empilhar(pilhaMatriz *p, int numero)
@@ -73,13 +73,28 @@ void destroi_pilha (pilhaMatriz *p)
     free (p);
 }
 
+void printar_Pilha (pilhaMatriz *p)
+{
+    noMatriz *aux = p->topo;
+
+    printf ("\npilha: ");
+
+    while (aux != NULL)
+    {
+        printf ("%d  ", aux->numero);
+
+        aux = aux->prox;
+    }
+
+    printf ("\n");
+}
 
 
 ///////////////////////////////////////////////////////////
 
-typedef struct {
+typedef struct filaMatriz{
 
-    noMatriz *inicio;
+    struct noMatriz *inicio;
     
 }filaMatriz;
 
@@ -88,6 +103,8 @@ filaMatriz* criarFila()
     filaMatriz *f = malloc(sizeof(filaMatriz));
 
     f->inicio = NULL;
+
+    return f;
 }
 
 void enfileirar (filaMatriz *f, int numero)
@@ -146,4 +163,20 @@ void destroi_fila (filaMatriz *f)
         free(remover);
     }
     free (f);
+}
+
+void printar_Fila (filaMatriz *f)
+{
+    noMatriz *aux = f->inicio;
+
+    printf ("\nfila: ");
+
+    while (aux != NULL)
+    {
+        printf ("%d  ", aux->numero);
+
+        aux = aux->prox;
+    }
+
+    printf ("\n");
 }
