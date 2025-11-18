@@ -11,7 +11,7 @@ typedef struct noGrafo
 
     int peso;
     int m;
-    noGrafo *prox;
+    struct noGrafo *prox;
 
 } noGrafo;
 
@@ -25,16 +25,16 @@ typedef struct grafo
 
 
 // estrutura no de fila e pilha
-typedef struct{
+typedef struct noLista{
 
-    noGrafo *no;
-    noLista *prox;
+    int vertice;
+    struct noLista *prox;
 
 }noLista;
 
 typedef struct {
 
-    noLista *topo;
+    struct noLista *topo;
     
 }pilhaLista;
 
@@ -44,14 +44,14 @@ pilhaLista* criarPilha()
 
     p->topo = NULL;
 
-    return 0;
+    return p;
 }
 
-void empilhar(pilhaLista *p, noGrafo *no)
+void empilhar(pilhaLista *p, int vertice)
 {
     noLista *novoNumero = malloc(sizeof(noLista));
 
-    novoNumero->no = no;
+    novoNumero->vertice = vertice;
     novoNumero->prox = p->topo;
 
     p->topo = novoNumero;
@@ -63,7 +63,11 @@ int desempilhar(pilhaLista *p)
 
     p->topo = p->topo->prox;
 
-    return aux->no->m;
+    int vertice = aux->vertice;
+
+    free(aux);
+
+    return vertice;
 }
 
 bool pilha_vazia (pilhaLista *p)
@@ -79,7 +83,7 @@ void destroi_pilha (pilhaLista *p)
 {
     noLista *aux = p->topo;
 
-    while (aux->prox != NULL)
+    while (aux != NULL)
     {
         noLista *remover = aux;
 
@@ -92,14 +96,26 @@ void destroi_pilha (pilhaLista *p)
     free (p);
 }
 
+void printar_Pilha (pilhaLista *p)
+{
+    noLista *aux = p->topo;
 
+    while (aux != NULL)
+    {
+        printf ("%d  ", aux->vertice);
+
+        aux = aux->prox;
+    }
+
+    printf ("\n");
+}
 
 
 ///////////////////////////////////////////////////////////
 
-typedef struct {
+typedef struct filaLista{
 
-    noLista *inicio;
+    struct noLista *inicio;
     
 }filaLista;
 
@@ -108,13 +124,15 @@ filaLista* criarFila()
     filaLista *f = malloc(sizeof(filaLista));
 
     f->inicio = NULL;
+
+    return f;
 }
 
-void enfileirar (filaLista *f, noGrafo *no)
+void enfileirar (filaLista *f, int vertice)
 {
     noLista *novoNumero = malloc(sizeof(noLista));
 
-    novoNumero->no = no;
+    novoNumero->vertice = vertice;
     novoNumero->prox = NULL;
 
     if (f->inicio == NULL){
@@ -139,7 +157,11 @@ int desenfileirar (filaLista *f)
 
     f->inicio = f->inicio->prox;
 
-    return aux->no->m;
+    int vertice = aux->vertice;
+
+    free(aux);
+
+    return vertice;
 }
 
 
@@ -156,7 +178,7 @@ void destroi_fila (filaLista *f)
 {
     noLista *aux = f->inicio;
 
-    while (aux->prox != NULL)
+    while (aux != NULL)
     {
         noLista *remover = aux;
 
@@ -165,4 +187,18 @@ void destroi_fila (filaLista *f)
         free(remover);
     }
     free (f);
+}
+
+void printar_Fila (filaLista *f)
+{
+    noLista *aux = f->inicio;
+
+    while (aux != NULL)
+    {
+        printf ("%d  ", aux->vertice);
+
+        aux = aux->prox;
+    }
+
+    printf ("\n");
 }

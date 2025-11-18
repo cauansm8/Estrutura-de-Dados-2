@@ -168,7 +168,7 @@ int maisPopular(grafo *g)
     {
         int grau_u = grau(g->adj[u]);
 
-        if (grau_u > grau)
+        if (grau_u > maiorGrau)
         {
             maiorU = u;
             maiorGrau = grau_u;
@@ -205,6 +205,20 @@ void imprimirRecomendacoes(grafo *g, int u)
     }
 }
 
+// busca em profundidade para o algoritmo encontra_componentes()
+void visita_recursiva_conexas(grafo *g, int *componentes, int comp, int v)
+{
+    componentes[v] = comp;
+
+    for (noGrafo *t = g->adj[v]; t != NULL; t = t->prox)
+    {
+        if (componentes[t->m] == -1)
+        {
+            visita_recursiva_conexas(g, componentes, comp, t->m);
+        }
+    }
+}
+
 // separa cada componente conexa em grupos diferentes
 int *encontra_componentes(grafo *g)
 {
@@ -227,16 +241,18 @@ int *encontra_componentes(grafo *g)
     return componentes;
 }
 
-// busca em profundidade para o algoritmo encontra_componentes()
-void visita_recursiva_conexas(grafo *g, int *componentes, int comp, int v)
-{
-    componentes[v] = comp;
 
-    for (noGrafo *t = g->adj[v]; t != NULL; t = t->prox)
+
+// busca em profundidade para o algoiritmo encontra_caminhos()
+void busca_em_profundidade(grafo *g, int *pais, int pai, int atual)
+{
+    pais[atual] = pai;
+
+    for (noGrafo *t = g->adj[atual]; t != NULL; t = t->prox)
     {
-        if (componentes[t->m] == -1)
+        if (pais[t->m] == -1)
         {
-            visita_recursiva_conexas(g, componentes, comp, t->m);
+            busca_em_profundidade(g, pais, atual, t->m);
         }
     }
 }
@@ -256,19 +272,7 @@ int *encontra_caminhos(grafo *g, int s)
     return pai;
 }
 
-// busca em profundidade para o algoiritmo encontra_caminhos()
-void busca_em_profundidade(grafo *g, int *pais, int pai, int atual)
-{
-    pais[atual] = pai;
 
-    for (noGrafo *t = g->adj[atual]; t != NULL; t = t->prox)
-    {
-        if (pais[t->m] == -1)
-        {
-            busca_em_profundidade(g, pais, atual, t->m);
-        }
-    }
-}
 
 // imprime o caminho ao contrário (destino retornando para raiz)
 void imprimir_caminho_reverso(int destino, int *pai)
@@ -277,7 +281,7 @@ void imprimir_caminho_reverso(int destino, int *pai)
 
     if (pai[destino] != destino)
     {
-        imprimi_caminho_reverso(pai[destino], pai);
+        imprimir_caminho_reverso(pai[destino], pai);
     }
 }
 
@@ -286,7 +290,7 @@ void imprimir_caminho(int destino, int *pai)
 {
     if (pai[destino] != destino)
     {
-        imprimi_caminho(pai[destino], pai);
+        imprimir_caminho(pai[destino], pai);
     }
 
     printf("%d", destino);
@@ -299,7 +303,7 @@ int *busca_em_profundidadePilha(grafo *g, int s)
 
     int *visitado = malloc(g->n * sizeof(int));
 
-    pilhaLista *p = criar_pilha();
+    pilhaLista *p = criarPilha();
 
     for (int v = 0; v < g->n; v++)
     {
@@ -307,7 +311,7 @@ int *busca_em_profundidadePilha(grafo *g, int s)
         visitado[v] = 0;
     }
 
-    empilhar(p, g->adj[s]);
+    empilhar(p, s);
 
     pai[s] = s;
 
@@ -319,12 +323,14 @@ int *busca_em_profundidadePilha(grafo *g, int s)
 
         for (int w = 0; w < g->n; w++)
         {
-            if (tem_aresta(g, v, w) && !visitado[w])
+            if (tem_aresta(g, v, w) == 1 && visitado[w] == 0)
             {
                 pai[w] = v;
-                empilhar(p, g->adj[w]);
+                empilhar(p, w);
             }
         }
+
+        printar_Pilha(p);
     }
 
     destroi_pilha(p);
@@ -334,7 +340,7 @@ int *busca_em_profundidadePilha(grafo *g, int s)
     return pai;
 }
 
-int *busca_em_profundidadeFila(grafo *g, int s)
+int *busca_em_larguraFila(grafo *g, int s)
 {
 
     int *pai = malloc(g->n * sizeof(int));
@@ -349,7 +355,7 @@ int *busca_em_profundidadeFila(grafo *g, int s)
         visitado[v] = 0;
     }
 
-    enfileirar(f, g->adj[s]);
+    enfileirar(f, s);
 
     pai[s] = s;
 
@@ -363,11 +369,13 @@ int *busca_em_profundidadeFila(grafo *g, int s)
         {
             if (tem_aresta(g, v, w) && !visitado[w])
             {
-                visitado[v] = 1;
+                visitado[w] = 1;
                 pai[w] = v;
-                enfileirar(f, g->adj[w]);
+                enfileirar(f, w);
             }
         }
+
+        printar_Fila(f);
     }
 
     destroi_fila(f);
@@ -375,6 +383,21 @@ int *busca_em_profundidadeFila(grafo *g, int s)
     free(visitado);
 
     return pai;
+}
+
+void visita_recursiva_topologica(grafo *g, int *visitado, int v)
+{
+    visitado[v] = 1;
+    for (noGrafo *t = g->adj[v]; t != NULL; t = t->prox)
+    {
+        if (visitado[t->m] == 0)
+        {
+            visita_recursiva_topologica(g, visitado, t->m);
+        }
+            
+    }
+        
+    printf("%d ", v);
 }
 
 void ordenacao_topologica(grafo *g)
@@ -398,23 +421,24 @@ void ordenacao_topologica(grafo *g)
     printf("\n");
 }
 
-void visita_recursiva_topologica(grafo *g, int *visitado, int v)
-{
-    visitado[v] = 1;
-    for (noGrafo *t = g->adj[v]; t != NULL; t = t->prox)
-    {
-        if (visitado[t->m] == 0)
-        {
-            visita_recursiva_topologica(g, visitado, t->m);
-        }
-            
-    }
-        
-    printf("%d ", v);
-}
+
 
 int main()
 {
+    grafo *g = criarGrafo(4);
+
+    insere_aresta(g, 0, 2, 3);
+    insere_aresta(g, 0, 3, 1);
+    insere_aresta(g, 3, 1, 4);
+
+    int *retorno = busca_em_larguraFila(g, 0);
+
+    printf ("\n\n\n");
+
+    for (int i = 0; i < 4; i++)
+    {
+        printf ("%d   ", retorno[i]);
+    }
 
     return 0;
 }
