@@ -3,17 +3,6 @@
 #include "PilhasFilas/GrMatriz.c"
 
 
-/* 
-
-    para representar matriz de adjacência com pesos nas arestas:
-            há conexão: valor peso
-            não há conexâo: 0 ou -1
-
-            mas precisa alterar algumas lógicas das funções implementadas
-
-*/
-
-
 // estrutura do grafo
 typedef struct
 {
@@ -63,14 +52,12 @@ void destruirGrafo(grafo *g)
 void insereAresta(grafo *g, int u, int v)
 {
     g->adj[u][v] = 1;
-    g->adj[v][u] = 1;
 }
 
 // removendo do grafo
 void removeAresta(grafo *g, int u, int v)
 {
     g->adj[u][v] = 0;
-    g->adj[v][u] = 0;
 }
 
 // verificando aresta
@@ -181,6 +168,7 @@ void imprimirRecomendacoes(grafo *g, int u)
     }
 }
 
+// auxiliar de existe_caminho
 int busca_rec(grafo *g, int *visitado, int v, int t)
 {
 
@@ -205,6 +193,7 @@ int busca_rec(grafo *g, int *visitado, int v, int t)
     return 0;
 }
 
+// verifica se ha caminho entre s e t
 int existe_caminho(grafo *g, int s, int t)
 {
     int encontrou, *visitado = malloc(g->n * sizeof(int));
@@ -275,29 +264,29 @@ void imprimir_caminho(int destino, int *pai)
 // busca em profundidade com pilha
 int *busca_em_profundidadePilha(grafo *g, int s)
 {
-   
+
     int *pai = malloc(g->n * sizeof(int));
-    
+
     int *visitado = malloc(g->n * sizeof(int));
-    
+
     pilhaMatriz *p = criarPilha();
-    
+
     for (int v = 0; v < g->n; v++)
     {
         pai[v] = -1;
         visitado[v] = 0;
     }
-    
+
     empilhar(p, s);
-    
+
     pai[s] = s;
-    
+
     while (pilha_vazia(p) == false)
     {
         int v = desempilhar(p);
-        
+
         visitado[v] = 1;
-        
+
         for (int w = 0; w < g->n; w++)
         {
             if (g->adj[v][w] && !visitado[w])
@@ -306,43 +295,43 @@ int *busca_em_profundidadePilha(grafo *g, int s)
                 empilhar(p, w);
             }
         }
-         
+
         printar_Pilha(p);
     }
 
     destroi_pilha(p);
-    
+
     free(visitado);
-    
+
     return pai;
 }
 
 // busca em largura com fila
 int *busca_em_larguraFila(grafo *g, int s)
 {
-    
+
     int *pai = malloc(g->n * sizeof(int));
-    
+
     int *visitado = malloc(g->n * sizeof(int));
-    
+
     filaMatriz *f = criarFila();
-    
+
     for (int v = 0; v < g->n; v++)
     {
         pai[v] = -1;
         visitado[v] = 0;
     }
-    
+
     enfileirar(f, s);
-    
+
     pai[s] = s;
 
     visitado[s] = 1;
-    
+
     while (fila_vazia(f) == false)
     {
         int v = desenfileirar(f);
-        
+
         for (int w = 0; w < g->n; w++)
         {
             if (g->adj[v][w] && !visitado[w])
@@ -354,35 +343,118 @@ int *busca_em_larguraFila(grafo *g, int s)
         }
 
         printar_Fila(f);
-            
     }
 
     destroi_fila(f);
-    
+
     free(visitado);
-    
+
     return pai;
 }
 
-void imprimirMatriz (grafo *g)
-{
-
-    printf ("/ ");
+// auxiliar de ordenacao_topologica
+void visita_rec(grafo *g, int *visitado, int v)
+{   
+    visitado[v] = 1;
 
     for (int i = 0; i < g->n; i++)
     {
-        printf ("%d  ", i);
+        if (g->adj[v][i] == 1 && !visitado[i])
+        {
+            visita_rec(g, visitado, i);
+        }
+    }
+        
+    printf("%d ", v);
+}
+
+// verifica quais vertices não tem conexão e printa de ordem reversa (semelhante ao pos_ordem em arvores binarias)
+void ordenacao_topologica(grafo *g)
+{
+    printf ("\nOrdenacao topologica: ");
+
+    int s, *visitado = malloc(g->n * sizeof(int));
+    for (s = 0; s < g->n; s++)
+    {
+        visitado[s] = 0;
+    }
+        
+    for (s = 0; s < g->n; s++)
+    {
+        if (!visitado[s])
+        {
+            visita_rec(g, visitado, s);
+        }
+    }
+        
+    free(visitado);
+    printf("\n");
+}
+
+// encontra o menor caminho possível entre dois pontos
+
+// Esse algoritmo não foi implementado, pois é necessário alterar a estrutura da matriz (colocar os pesos)
+// a implementação desse algoritmo foi feita em 'digrafo_lista.c'
+
+/* int* dijkstra(grafo *g, int inicio)
+{
+    int *pai = malloc(g->n * sizeof(int));
+
+    FP *heap = criar_FP(g->n);
+
+    for (int i = 0; i < g->n; i++)
+    {
+        pai[i] = -1;
+        insere_FP(heap, i, INT_MAX);
     }
 
-    printf ("\n");
+    pai[inicio] = inicio;
+
+    diminuiprioridade_FP(heap, inicio, 0);
+
+    while (!vazia_FP(heap))
+    {
+        int atual = extrai_minimo_FP(heap);
+
+        if (prioridade_FP(atual, heap) != INT_MAX)
+        {
+            for (noGrafo *aux = g->adj[atual]; aux != NULL; aux = aux->prox)
+            {
+                if (prioridade_FP(heap, atual) + aux->peso < prioridade_FP (heap, aux->m))
+                {
+                    pai[aux->m] = atual;
+                    
+                    diminuiprioridade_FP(heap, aux->m, prioridade_FP(heap, atual) + aux->peso);
+                }
+            }
+        }
+    }
+
+    return pai;
+} */
+
+
+
+
+void imprimirMatriz(grafo *g)
+{
+
+    printf("/ ");
+
     for (int i = 0; i < g->n; i++)
     {
-        printf ("%d ", i);
+        printf("%d  ", i);
+    }
+
+    printf("\n");
+    for (int i = 0; i < g->n; i++)
+    {
+        printf("%d ", i);
         for (int j = 0; j < g->n; j++)
         {
-            printf ("%d  ", g->adj[i][j]);
+            printf("%d  ", g->adj[i][j]);
         }
-        printf ("\n");
+        printf("\n");
     }
 }
 
@@ -394,13 +466,15 @@ int main()
     insereAresta(g, 0, 3);
     insereAresta(g, 3, 1);
 
+    ordenacao_topologica(g);
+
     imprimirMatriz(g);
 
     int *resultado = busca_em_larguraFila(g, 0);
 
     for (int i = 0; i < 4; i++)
     {
-        printf ("\n%d", resultado[i]);
+        printf("\n%d", resultado[i]);
     }
 
     destruirGrafo(g);
